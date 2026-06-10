@@ -17,15 +17,17 @@ import Register from "@/pages/public/Register"
 import RegisterSuccess from "@/pages/public/RegisterSuccess"
 import SuperAdminLogin from "@/pages/superadmin/SuperAdminLogin"
 import Showcase from "@/pages/Showcase"
+import MenuItems from "@/pages/admin/MenuItems"
+import Categories from "@/pages/admin/Categories"
+import Tables from "@/pages/admin/Tables"
+import Staff from "@/pages/admin/Staff"
+import Registrations from "@/pages/superadmin/Registrations"
+import RegistrationDetail from "@/pages/superadmin/RegistrationDetail"
 
 // Placeholder components
 const NotFound = () => <div className="p-8 text-center text-xl">404 - Not Found</div>
 
 const AdminDashboard = () => <div className="text-xl">Admin Dashboard</div>
-const MenuManagement = () => <div className="text-xl">Menu Management</div>
-const CategoryManagement = () => <div className="text-xl">Category Management</div>
-const TableManagement = () => <div className="text-xl">Table Management</div>
-const StaffManagement = () => <div className="text-xl">Staff Management</div>
 const AdminAnalytics = () => <div className="text-xl">Admin Analytics</div>
 
 const KitchenPortal = () => <div className="p-6 text-xl">Kitchen Portal</div>
@@ -33,7 +35,6 @@ const WaiterPortal = () => <div className="p-6 text-xl">Waiter Portal</div>
 const CashierPortal = () => <div className="p-6 text-xl">Cashier Portal</div>
 
 const SuperAdminDashboard = () => <div className="text-xl">Super Admin Dashboard</div>
-const Registrations = () => <div className="text-xl">Registrations</div>
 const Restaurants = () => <div className="text-xl">Restaurants</div>
 const SuperAdminAnalytics = () => <div className="text-xl">Super Admin Analytics</div>
 const AuditLog = () => <div className="text-xl">Audit Log</div>
@@ -72,10 +73,10 @@ export default function App() {
           }
         >
           <Route index element={<AdminDashboard />} />
-          <Route path="menu" element={<MenuManagement />} />
-          <Route path="categories" element={<CategoryManagement />} />
-          <Route path="tables" element={<TableManagement />} />
-          <Route path="staff" element={<StaffManagement />} />
+          <Route path="menu" element={<MenuItems />} />
+          <Route path="categories" element={<Categories />} />
+          <Route path="tables" element={<Tables />} />
+          <Route path="staff" element={<Staff />} />
           <Route path="analytics" element={<AdminAnalytics />} />
         </Route>
 
@@ -128,6 +129,7 @@ export default function App() {
         >
           <Route index element={<SuperAdminDashboard />} />
           <Route path="registrations" element={<Registrations />} />
+          <Route path="registrations/:id" element={<RegistrationDetail />} />
           <Route path="restaurants" element={<Restaurants />} />
           <Route path="analytics" element={<SuperAdminAnalytics />} />
           <Route path="audit-log" element={<AuditLog />} />

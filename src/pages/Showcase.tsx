@@ -9,8 +9,8 @@ import {
   ConfirmDialog,
   StatusBadge,
   DataTable,
-  type DataTableColumn,
 } from '@/components/shared'
+import type { Column } from '@/components/shared/DataTable'
 import { FormField, FormTextarea } from '@/components/forms'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -42,27 +42,23 @@ export default function Showcase() {
   const [dialogLoading, setDialogLoading] = useState(false)
 
   // Table columns definition
-  const columns: DataTableColumn<TableRowData>[] = [
+  const columns: Column<TableRowData>[] = [
     {
-      id: 'name',
       header: 'Name',
-      accessorKey: 'name',
+      accessor: 'name',
     },
     {
-      id: 'role',
       header: 'Role',
-      accessorKey: 'role',
+      accessor: 'role',
       className: 'font-mono text-xs text-slate-600',
     },
     {
-      id: 'status',
       header: 'Status',
-      cell: (row) => <StatusBadge status={row.status} />,
+      accessor: (row: TableRowData) => <StatusBadge status={row.status as any} />,
     },
     {
-      id: 'amount',
       header: 'Amount',
-      cell: (row) => <span className="font-semibold">${row.amount.toFixed(2)}</span>,
+      accessor: (row: TableRowData) => <span className="font-semibold">${row.amount.toFixed(2)}</span>,
       className: 'text-right',
     },
   ]
@@ -159,8 +155,7 @@ export default function Showcase() {
                 <DataTable
                   columns={columns}
                   data={mockTableData}
-                  getRowId={(row) => row.id}
-                  onRowClick={(row) => toast.info(`Clicked row: ${row.name}`)}
+                  onRowClick={(row: TableRowData) => toast.info(`Clicked row: ${row.name}`)}
                 />
               </CardContent>
             </Card>
