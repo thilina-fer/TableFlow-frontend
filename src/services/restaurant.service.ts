@@ -10,4 +10,25 @@ export class RestaurantService {
       throw handleApiError(error)
     }
   }
+
+  static async uploadImage(file: File): Promise<string> {
+    try {
+      const formData = new FormData()
+      formData.append("image", file)
+      
+      const response = await apiClient.post<ApiResponse<{ url: string }>>("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      
+      if (!response.data.data?.url) {
+        throw new Error("Failed to get image URL from server")
+      }
+      
+      return response.data.data.url
+    } catch (error) {
+      throw handleApiError(error)
+    }
+  }
 }
