@@ -3,19 +3,17 @@ import { useNavigate, Link } from "react-router-dom"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { UtensilsCrossed, Eye, EyeOff, Loader2 } from "lucide-react"
+import { Eye, EyeOff, Loader2, ArrowRight } from "lucide-react"
 
 import { useAppDispatch } from "@/app/hooks"
 import { setCredentials } from "@/features/auth/authSlice"
 import { AuthService } from "@/services/auth.service"
 
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { FormField } from "@/components/forms"
 import { ErrorAlert } from "@/components/shared"
-import { theme } from "@/lib/theme"
 import { ROLE_REDIRECT } from "@/lib/constants"
-
+import loginImage from "@/assets/image.png"
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -66,21 +64,36 @@ export const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg border-slate-200">
-        <CardHeader className="space-y-4 pb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-brand rounded-xl p-2 text-white">
-              <UtensilsCrossed size={32} />
-            </div>
-            <span className="text-2xl font-bold text-slate-900 tracking-tight">TableFlow</span>
+    <div className="w-full min-h-screen lg:grid lg:grid-cols-2 bg-slate-50">
+      {/* Left Side: Image overlay */}
+      <div className="hidden lg:block relative h-full w-full">
+        <img 
+          src={loginImage} 
+          alt="Restaurant background" 
+          className="absolute inset-0 h-full w-full object-cover" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+        
+        <div className="absolute bottom-16 left-12 right-12 text-white">
+          <h1 className="text-5xl font-bold mb-6 leading-tight text-white tracking-tight">
+            Elevate your<br />restaurant operations.
+          </h1>
+          <p className="text-lg text-slate-200/90 max-w-lg leading-relaxed">
+            Streamline your workflow from host stand to kitchen with TableFlow's intuitive management suite.
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side: Form */}
+      <div className="flex items-center justify-center p-8 sm:p-12 h-full">
+        <div className="w-full max-w-[400px]">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">Welcome back</h2>
+            <p className="text-sm text-slate-500">
+              Please enter your details to sign in to your account.
+            </p>
           </div>
-          <div>
-            <CardTitle className="text-xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
+
           {errorMsg && (
             <div className="mb-6">
               <ErrorAlert message={errorMsg} />
@@ -88,13 +101,14 @@ export const Login = () => {
           )}
 
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} className={theme.formGap}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 name="email"
                 label="Email Address"
                 control={methods.control}
-                placeholder="you@restaurant.com"
+                placeholder="manager@restaurant.com"
               />
+              
               <div className="relative">
                 <FormField
                   name="password"
@@ -106,37 +120,50 @@ export const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-9 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  className="absolute right-3 top-[34px] text-slate-400 hover:text-slate-600 focus:outline-none"
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
+              <div className="flex items-center justify-between text-sm py-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" className="rounded border-slate-300 text-orange-500 focus:ring-orange-500" />
+                  <span className="text-slate-500 font-medium">Remember me</span>
+                </label>
+                <Link to="#" className="text-orange-500 hover:text-orange-600 hover:underline font-medium">
+                  Forgot password?
+                </Link>
+              </div>
+
               <Button
                 type="submit"
-                className={`w-full mt-6 ${theme.btn.brand}`}
+                className="w-full h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base rounded-md transition-colors"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     Signing in...
                   </>
                 ) : (
-                  "Sign In"
+                  <>
+                    Sign In
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </>
                 )}
               </Button>
             </form>
           </FormProvider>
-        </CardContent>
-      </Card>
-      
-      <div className="mt-8 text-sm text-slate-500">
-        Want to register your restaurant?{" "}
-        <Link to="/register" className="text-brand hover:underline font-medium">
-          Apply here
-        </Link>
+
+          <div className="mt-8 text-center text-sm font-medium text-slate-500">
+            Want to register your restaurant?{" "}
+            <Link to="/register" className="text-orange-500 hover:text-orange-600 hover:underline">
+              Apply here
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   )
