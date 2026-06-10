@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import React from "react"
 import {
   Table,
   TableBody,
@@ -6,110 +6,121 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { theme } from "@/lib/theme"
 
-export interface DataTableColumn<T> {
-  /** Column header label */
+export interface Column<T> {
   header: string
-  /** Unique key for the column */
-  id: string
-  /** Either a key of T or a render function */
-  accessorKey?: keyof T
-  cell?: (row: T) => React.ReactNode
-  /** Optional class for the <th> / <td> */
+  accessor: keyof T | ((row: T) => React.ReactNode)
   className?: string
 }
 
-interface DataTableProps<T> {
-  columns: DataTableColumn<T>[]
+export interface DataTableProps<T> {
+  columns: Column<T>[]
   data: T[]
-  /** Row key extractor */
-  getRowId: (row: T) => string | number
-  onRowClick?: (row: T) => void
   isLoading?: boolean
-  emptyMessage?: string
-  className?: string
+  onRowClick?: (row: T) => void
+  pagination?: {
+    page: number
+    pages: number
+    total: number
+    onPageChange: (page: number) => void
+  }
+  emptyState?: React.ReactNode
 }
 
 export function DataTable<T>({
   columns,
   data,
-  getRowId,
+  isLoading,
   onRowClick,
-  isLoading = false,
-  emptyMessage = 'No records found.',
-  className,
+  pagination,
+  emptyState,
 }: DataTableProps<T>) {
   return (
-    <div
-      className={cn(
-        'rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden',
-        className,
-      )}
-    >
-      <Table>
-        <TableHeader>
-          <TableRow className="bg-slate-50 hover:bg-slate-50">
-            {columns.map((col) => (
-              <TableHead
-                key={col.id}
-                className={cn(
-                  'text-xs font-semibold uppercase tracking-wide text-slate-500',
-                  col.className,
-                )}
-              >
-                {col.header}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
+    <div className="space-y-4">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+        <Table>
+          <TableHeader className="bg-slate-50">
             <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-32 text-center text-sm text-slate-500"
-              >
-                <div className="flex items-center justify-center gap-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-                  Loading…
-                </div>
-              </TableCell>
+              {columns.map((col, i) => (
+                <TableHead key={i} className={theme.tableHeader}>
+                  {col.header}
+                </TableHead>
+              ))}
             </TableRow>
-          ) : data.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={columns.length}
-                className="h-32 text-center text-sm text-slate-500"
-              >
-                {emptyMessage}
-              </TableCell>
-            </TableRow>
-          ) : (
-            data.map((row) => (
-              <TableRow
-                key={getRowId(row)}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
-                className={cn(
-                  'border-slate-100 text-sm',
-                  onRowClick &&
-                    'cursor-pointer hover:bg-slate-50 transition-colors',
-                )}
-              >
-                {columns.map((col) => (
-                  <TableCell key={col.id} className={col.className}>
-                    {col.cell
-                      ? col.cell(row)
-                      : col.accessorKey !== undefined
-                        ? String(row[col.accessorKey] ?? '')
-                        : null}
-                  </TableCell>
-                ))}
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {columns.map((_, colIndex) => (
+                    <TableCell key={colIndex}>
+                      <Skeleton className="h-6 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-48 text-center p-0 align-middle">
+                  {emptyState || <span className="text-slate-500">No data available.</span>}
+                </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              data.map((row, rowIndex) => (
+                <TableRow
+                  key={rowIndex}
+                  className={`${theme.tableRow} ${onRowClick ? "cursor-pointer hover:bg-slate-50" : ""}`}
+                  onClick={() => onRowClick && onRowClick(row)}
+                >
+                  {columns.map((col, colIndex) => (
+                    <TableCell key={colIndex} className={col.className}>
+                      {typeof col.accessor === "function"
+                        ? col.accessor(row)
+                        : (row[col.accessor as keyof T] as React.ReactNode)}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {pagination && (
+        <div className="flex items-center justify-between px-2">
+          <div className="text-sm text-slate-500">
+            Total: <span className="font-medium text-slate-900">{pagination.total}</span> results
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => pagination.onPageChange(pagination.page - 1)}
+              disabled={pagination.page <= 1 || isLoading}
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Prev
+            </Button>
+            <div className="text-sm text-slate-600 px-2 font-medium">
+              Page {pagination.page} of {Math.max(1, pagination.pages)}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => pagination.onPageChange(pagination.page + 1)}
+              disabled={pagination.page >= pagination.pages || isLoading}
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
