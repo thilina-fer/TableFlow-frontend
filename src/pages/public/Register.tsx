@@ -113,11 +113,21 @@ export const Register = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     setErrorMsg(null)
     try {
-      // Temporary: Use placeholder URLs since Cloudinary isn't connected
+      let finalLogoUrl = ""
+      let finalCoverUrl = ""
+
+      if (logoFile) {
+        finalLogoUrl = await RestaurantService.uploadImage(logoFile)
+      }
+      
+      if (coverFile) {
+        finalCoverUrl = await RestaurantService.uploadImage(coverFile)
+      }
+
       const payload = {
         ...data,
-        logoUrl: logoFile ? "https://placehold.co/400x400/png?text=Logo" : "",
-        coverImageUrl: coverFile ? "https://placehold.co/1200x400/png?text=Cover" : "",
+        logoUrl: finalLogoUrl,
+        coverImageUrl: finalCoverUrl,
       }
 
       await RestaurantService.register(payload)
