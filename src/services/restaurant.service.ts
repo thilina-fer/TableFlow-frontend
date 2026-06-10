@@ -4,7 +4,7 @@ import type { ApiResponse } from "@/types"
 export class RestaurantService {
   static async register(data: any) {
     try {
-      const response = await apiClient.post<ApiResponse<{ restaurantId: string }>>("/restaurants/register", data)
+      const response = await apiClient.post<ApiResponse<{ restaurantId: string }>>("/register/restaurant", data)
       return response.data
     } catch (error) {
       throw handleApiError(error)
