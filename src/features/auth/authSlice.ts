@@ -50,10 +50,14 @@ export const authSlice = createSlice({
       state.isFirstLogin = false
       localStorage.setItem("isFirstLogin", "false")
     },
+    setAccessToken: (state, action: PayloadAction<string>) => {
+      state.accessToken = action.payload
+      localStorage.setItem("accessToken", action.payload)
+    },
   },
 })
 
-export const { setCredentials, clearCredentials, setFirstLoginFalse } = authSlice.actions
+export const { setCredentials, clearCredentials, setFirstLoginFalse, setAccessToken } = authSlice.actions
 
 export const selectCurrentUser = (state: RootState) => state.auth.user
 export const selectAccessToken = (state: RootState) => state.auth.accessToken
