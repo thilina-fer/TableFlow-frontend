@@ -1,50 +1,27 @@
-import type { ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import React from "react"
+import { Button } from "@/components/ui/button"
+import { theme } from "@/lib/theme"
 
 interface EmptyStateProps {
-  icon?: ReactNode
+  icon?: React.ReactNode
   title: string
   description?: string
-  actionLabel?: string
-  onAction?: () => void
-  className?: string
+  action?: { label: string; onClick: () => void }
 }
 
-export function EmptyState({
-  icon,
-  title,
-  description,
-  actionLabel,
-  onAction,
-  className,
-}: EmptyStateProps) {
+export const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, description, action }) => {
   return (
-    <div
-      className={cn(
-        'flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-200 bg-white p-12 text-center shadow-sm',
-        className,
-      )}
-    >
-      {icon && (
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
-          {icon}
-        </div>
-      )}
-      <div className="space-y-1">
-        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-        {description && (
-          <p className="text-sm text-slate-500">{description}</p>
-        )}
-      </div>
-      {actionLabel && onAction && (
-        <Button
-          onClick={onAction}
-          className="bg-orange-500 hover:bg-orange-600 text-white"
-        >
-          {actionLabel}
+    <div className="flex flex-col items-center justify-center p-8 text-center bg-white border border-slate-200 rounded-xl shadow-sm">
+      {icon && <div className="text-slate-400 mb-4">{icon}</div>}
+      <h3 className="text-lg font-medium text-slate-900 mb-2">{title}</h3>
+      {description && <p className="text-sm text-slate-500 max-w-sm mb-6">{description}</p>}
+      {action && (
+        <Button onClick={action.onClick} className={theme.btn.brand}>
+          {action.label}
         </Button>
       )}
     </div>
   )
 }
+
+export default EmptyState

@@ -1,25 +1,32 @@
-import type { ReactNode } from 'react'
+import React from "react"
+import { theme } from "@/lib/theme"
+import { Button } from "@/components/ui/button"
 
 interface PageHeaderProps {
   title: string
   subtitle?: string
-  action?: ReactNode
+  action?: {
+    label: string
+    onClick: () => void
+    icon?: React.ReactNode
+  }
 }
 
-export function PageHeader({ title, subtitle, action }: PageHeaderProps) {
+export const PageHeader: React.FC<PageHeaderProps> = ({ title, subtitle, action }) => {
   return (
-    <div className="flex items-start justify-between gap-4 mb-6">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="text-sm text-slate-500">{subtitle}</p>
-        )}
+    <div className="flex flex-row items-center justify-between mb-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+        {subtitle && <p className="text-sm text-slate-500 mt-1">{subtitle}</p>}
       </div>
       {action && (
-        <div className="shrink-0">{action}</div>
+        <Button onClick={action.onClick} className={theme.btn.brand}>
+          {action.icon && <span className="mr-2">{action.icon}</span>}
+          {action.label}
+        </Button>
       )}
     </div>
   )
 }
+
+export default PageHeader
