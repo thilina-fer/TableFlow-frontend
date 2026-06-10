@@ -1,61 +1,51 @@
-import { useFormContext } from 'react-hook-form'
-import { Label } from '@/components/ui/label'
-import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { Controller } from "react-hook-form"
+import type { Control, FieldValues, Path } from "react-hook-form"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
-interface FormFieldProps {
-  name: string
+// Type constraint for Control generic
+interface FormFieldProps<TFieldValues extends FieldValues> {
   label: string
+  name: Path<TFieldValues>
+  control: Control<TFieldValues>
   placeholder?: string
-  type?: React.HTMLInputTypeAttribute
+  type?: string
   disabled?: boolean
-  className?: string
+  description?: string
 }
 
-export function FormField({
-  name,
+export const FormField = <TFieldValues extends FieldValues>({
   label,
+  name,
+  control,
   placeholder,
-  type = 'text',
-  disabled = false,
-  className,
-}: FormFieldProps) {
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext()
-
-  const error = errors[name]
-  const errorMessage =
-    error && typeof error.message === 'string' ? error.message : undefined
-
+  type = "text",
+  disabled,
+  description,
+}: FormFieldProps<TFieldValues>) => {
   return (
-    <div className={cn('space-y-1.5', className)}>
-      <Label htmlFor={name} className="text-sm font-medium text-slate-700">
-        {label}
-      </Label>
-      <Input
-        id={name}
-        type={type}
-        placeholder={placeholder}
-        disabled={disabled}
-        {...register(name)}
-        className={cn(
-          errorMessage &&
-            'border-red-500 focus-visible:ring-red-500',
-        )}
-        aria-describedby={errorMessage ? `${name}-error` : undefined}
-        aria-invalid={!!errorMessage}
-      />
-      {errorMessage && (
-        <p
-          id={`${name}-error`}
-          role="alert"
-          className="text-xs text-red-500"
-        >
-          {errorMessage}
-        </p>
+    <Controller
+      name={name}
+      control={control}
+      render={({ field, fieldState: { error } }) => (
+        <div className="space-y-2">
+          <Label htmlFor={name} className={error ? "text-red-500" : ""}>
+            {label}
+          </Label>
+          <Input
+            {...field}
+            id={name}
+            type={type}
+            placeholder={placeholder}
+            disabled={disabled}
+            className={error ? "border-red-500 focus-visible:ring-red-500" : ""}
+          />
+          {description && !error && <p className="text-sm text-slate-500">{description}</p>}
+          {error && <p className="text-sm font-medium text-red-500">{error.message}</p>}
+        </div>
       )}
-    </div>
+    />
   )
 }
+
+export default FormField
