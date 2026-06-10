@@ -7,7 +7,7 @@ import { AlertTriangle, Eye, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { setFirstLoginFalse, selectIsFirstLogin, selectCurrentUser } from "@/features/auth/authSlice"
+import { setFirstLoginFalse, setAccessToken, selectIsFirstLogin, selectCurrentUser } from "@/features/auth/authSlice"
 import { AuthService } from "@/services/auth.service"
 
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
@@ -55,12 +55,13 @@ export const ChangePassword = () => {
   const onSubmit = async (data: ChangePasswordFormValues) => {
     setErrorMsg(null)
     try {
-      await AuthService.changePassword({
+      const res = await AuthService.changePassword({
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
         confirmPassword: data.confirmPassword,
       })
 
+      dispatch(setAccessToken(res.accessToken))
       dispatch(setFirstLoginFalse())
       toast.success("Password changed successfully", {
         description: "You can now use your new password to sign in.",

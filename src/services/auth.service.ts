@@ -39,8 +39,8 @@ export class AuthService {
 
   static async changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }) {
     try {
-      const response = await apiClient.post<ApiResponse<void>>("/auth/change-password", data)
-      return response.data
+      const response = await apiClient.post<ApiResponse<{ accessToken: string }>>("/auth/change-password", data)
+      return response.data.data
     } catch (error) {
       throw handleApiError(error)
     }
