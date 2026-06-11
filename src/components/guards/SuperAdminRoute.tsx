@@ -11,7 +11,7 @@ export const SuperAdminRoute: React.FC<SuperAdminRouteProps> = ({ children }) =>
   const token = useAppSelector(selectSuperAdminToken)
 
   if (!token) {
-    return <Navigate to="/superadmin/login" replace />
+    return <Navigate to="/login" replace />
   }
 
   return <>{children ? children : <Outlet />}</>

@@ -3,10 +3,11 @@ import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { UtensilsCrossed, MoreVertical, Edit, Trash, Loader2 } from "lucide-react"
+import { UtensilsCrossed, MoreVertical, Edit, Trash, Loader2, Image, Upload, X } from "lucide-react"
 
 import { MenuItemService } from "@/services/menuItem.service"
 import { CategoryService } from "@/services/category.service"
+import { RestaurantService } from "@/services/restaurant.service"
 import type { MenuItem, Category } from "@/types"
 import { theme } from "@/lib/theme"
 
@@ -43,6 +44,7 @@ export default function MenuItems() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<MenuItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const methods = useForm<any>({
     resolver: zodResolver(menuItemSchema),
@@ -105,6 +107,22 @@ export default function MenuItems() {
       })
     }
     setSheetOpen(true)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    try {
+      const url = await RestaurantService.uploadImage(file)
+      methods.setValue("imageUrl", url, { shouldValidate: true })
+      toast.success("Image uploaded successfully")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to upload image")
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const onSubmit = async (data: MenuItemFormValues) => {
@@ -308,12 +326,48 @@ export default function MenuItems() {
                   control={methods.control}
                   placeholder="Brief description of the item"
                 />
-                <FormField
-                  name="imageUrl"
-                  label="Image URL"
-                  control={methods.control}
-                  placeholder="https://example.com/image.jpg"
-                />
+                <div className="space-y-2">
+                  <Label>Item Image</Label>
+                  {methods.watch("imageUrl") ? (
+                    <div className="relative w-full h-40 rounded-lg border border-slate-200 overflow-hidden">
+                      <img src={methods.watch("imageUrl")} alt="Preview" className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => methods.setValue("imageUrl", "")}
+                        className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-md hover:bg-black/70 transition-colors"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-32 rounded-lg border-2 border-dashed border-slate-200 hover:border-orange-500 hover:bg-orange-50/50 transition-colors flex flex-col items-center justify-center cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={isUploading}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                      />
+                      {isUploading ? (
+                        <>
+                          <Loader2 className="h-8 w-8 text-orange-500 animate-spin mb-2" />
+                          <span className="text-sm text-slate-500 font-medium">Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center mb-2 text-orange-600">
+                            <Image className="h-5 w-5" />
+                          </div>
+                          <span className="text-sm font-medium text-slate-700">Click to upload image</span>
+                          <span className="text-xs text-slate-400 mt-1">JPG, PNG, WEBP up to 5MB</span>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {methods.formState.errors.imageUrl && (
+                    <p className="text-[0.8rem] font-medium text-red-500">{methods.formState.errors.imageUrl.message as string}</p>
+                  )}
+                </div>
                 <FormField
                   name="preparationTimeMinutes"
                   label="Prep Time (minutes)"
