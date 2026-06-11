@@ -16,7 +16,6 @@ import Login from "@/pages/public/Login"
 import ChangePassword from "@/pages/public/ChangePassword"
 import Register from "@/pages/public/Register"
 import RegisterSuccess from "@/pages/public/RegisterSuccess"
-import SuperAdminLogin from "@/pages/superadmin/SuperAdminLogin"
 import Showcase from "@/pages/Showcase"
 import MenuItems from "@/pages/admin/MenuItems"
 import Categories from "@/pages/admin/Categories"
@@ -49,7 +48,6 @@ const AnimatedRoutes = () => {
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/superadmin/login" element={<SuperAdminLogin />} />
         <Route path="/register" element={<Register />} />
         <Route path="/register/success" element={<RegisterSuccess />} />
         <Route path="/showcase" element={<Showcase />} />
