@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import { useForm, FormProvider } from "react-hook-form"
+import { useForm, FormProvider, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { UtensilsCrossed, MoreVertical, Edit, Trash, Loader2, Image, Upload, X } from "lucide-react"
+import { UtensilsCrossed, MoreVertical, Edit, Trash, Loader2, Image, Upload, X, Plus } from "lucide-react"
 
 import { MenuItemService } from "@/services/menuItem.service"
 import { CategoryService } from "@/services/category.service"
@@ -24,15 +24,128 @@ import { Label } from "@/components/ui/label"
 const menuItemSchema = z.object({
   name: z.string().min(2, "Min 2 characters").max(100),
   description: z.string().max(500).optional(),
-  price: z.coerce.number().positive("Must be positive"),
+  price: z.coerce.number().min(0, "Must be valid price"),
   categoryId: z.string().min(1, "Select a category"),
   imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   preparationTimeMinutes: z.coerce.number().int().min(1).max(300).optional().or(z.literal("")),
   isAvailable: z.boolean().default(true),
   tags: z.string().optional(),
+  variants: z.array(z.object({
+    name: z.string().min(1, "Name required"),
+    price: z.coerce.number().positive("Must be positive")
+  })).optional(),
 })
 
 type MenuItemFormValues = z.infer<typeof menuItemSchema>
+
+const MenuItemCard = ({ 
+  item, 
+  categories, 
+  handleOpenSheet, 
+  setDeleteTarget, 
+  handleToggle 
+}: { 
+  item: MenuItem, 
+  categories: Category[],
+  handleOpenSheet: (item: MenuItem) => void,
+  setDeleteTarget: (id: string) => void,
+  handleToggle: (id: string, current: boolean) => void
+}) => {
+  const catName = typeof item.categoryId === 'string'
+    ? categories.find(c => c._id === item.categoryId)?.name
+    : item.categoryId.name
+
+  const hasVariants = item.variants && item.variants.length > 0
+  const [selectedVariantIdx, setSelectedVariantIdx] = useState(0)
+
+  const currentPrice = hasVariants ? item.variants![selectedVariantIdx].price : item.price
+
+  return (
+    <div className={`${theme.card} p-4 flex flex-col h-[440px]`}>
+      {item.imageUrl ? (
+        <img src={item.imageUrl} alt={item.name} className="w-full h-40 object-cover rounded-lg mb-3 shrink-0" />
+      ) : (
+        <div className="w-full h-40 bg-slate-100 rounded-lg mb-3 flex items-center justify-center shrink-0">
+          <UtensilsCrossed className="text-slate-300" size={32} />
+        </div>
+      )}
+
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex justify-between items-start mb-1 shrink-0">
+          <h3 className="font-semibold text-slate-900 leading-tight truncate pr-2">{item.name}</h3>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 shrink-0">
+                <MoreVertical className="h-4 w-4 text-slate-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleOpenSheet(item)}>
+                <Edit className="h-4 w-4 mr-2" /> Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setDeleteTarget(item._id)}
+                className="text-red-600 focus:bg-red-50 focus:text-red-700"
+              >
+                <Trash className="h-4 w-4 mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <p className="text-xs text-slate-400 mb-2 shrink-0">{catName}</p>
+        
+        {item.description && (
+          <p className="text-sm text-slate-500 line-clamp-2 mb-2 shrink-0">{item.description}</p>
+        )}
+
+        {/* Spacer to push content to bottom */}
+        <div className="flex-1" />
+
+        <div className="shrink-0 mb-3">
+          <div className="font-bold text-slate-900 text-lg">
+            LKR {currentPrice.toFixed(2)}
+          </div>
+          {hasVariants && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {item.variants!.map((v, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setSelectedVariantIdx(idx)}
+                  className={`text-[10px] px-2.5 py-1 rounded-md font-semibold transition-colors border ${
+                    selectedVariantIdx === idx 
+                    ? 'bg-orange-50 text-orange-700 border-orange-200 shadow-sm' 
+                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {v.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {item.tags && item.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3 shrink-0">
+            {item.tags.map((tag, idx) => (
+              <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="pt-3 mt-auto border-t border-slate-100 flex items-center justify-between shrink-0">
+        <span className="text-sm text-slate-600 font-medium">Available</span>
+        <Switch
+          checked={item.isAvailable}
+          onCheckedChange={() => handleToggle(item._id, item.isAvailable)}
+        />
+      </div>
+    </div>
+  )
+}
 
 export default function MenuItems() {
   const [items, setItems] = useState<MenuItem[]>([])
@@ -57,7 +170,13 @@ export default function MenuItems() {
       preparationTimeMinutes: "",
       isAvailable: true,
       tags: "",
+      variants: [],
     },
+  })
+
+  const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
+    control: methods.control,
+    name: "variants",
   })
 
   const fetchData = async () => {
@@ -92,6 +211,7 @@ export default function MenuItems() {
         preparationTimeMinutes: item.preparationTimeMinutes || "",
         isAvailable: item.isAvailable,
         tags: item.tags?.join(", ") || "",
+        variants: item.variants || [],
       })
     } else {
       setEditTarget(null)
@@ -104,6 +224,7 @@ export default function MenuItems() {
         preparationTimeMinutes: "",
         isAvailable: true,
         tags: "",
+        variants: [],
       })
     }
     setSheetOpen(true)
@@ -129,10 +250,12 @@ export default function MenuItems() {
     try {
       const formattedData = {
         ...data,
+        price: data.variants && data.variants.length > 0 ? 0 : data.price,
         preparationTimeMinutes: data.preparationTimeMinutes === "" ? undefined : Number(data.preparationTimeMinutes),
         tags: data.tags ? data.tags.split(",").map(t => t.trim()).filter(Boolean) : [],
         imageUrl: data.imageUrl === "" ? undefined : data.imageUrl,
-        description: data.description === "" ? undefined : data.description
+        description: data.description === "" ? undefined : data.description,
+        variants: data.variants && data.variants.length > 0 ? data.variants : undefined
       }
 
       if (editTarget) {
@@ -218,74 +341,16 @@ export default function MenuItems() {
             />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filteredItems.map((item) => {
-                const catName = typeof item.categoryId === 'string'
-                  ? categories.find(c => c._id === item.categoryId)?.name
-                  : item.categoryId.name
-
-                return (
-                  <div key={item._id} className={`${theme.card} p-4 flex flex-col`}>
-                    {item.imageUrl ? (
-                      <img src={item.imageUrl} alt={item.name} className="w-full h-40 object-cover rounded-lg mb-3" />
-                    ) : (
-                      <div className="w-full h-40 bg-slate-100 rounded-lg mb-3 flex items-center justify-center">
-                        <UtensilsCrossed className="text-slate-300" size={32} />
-                      </div>
-                    )}
-
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-semibold text-slate-900 leading-tight">{item.name}</h3>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2">
-                              <MoreVertical className="h-4 w-4 text-slate-400" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleOpenSheet(item)}>
-                              <Edit className="h-4 w-4 mr-2" /> Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setDeleteTarget(item._id)}
-                              className="text-red-600 focus:bg-red-50 focus:text-red-700"
-                            >
-                              <Trash className="h-4 w-4 mr-2" /> Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-
-                      <p className="text-xs text-slate-400 mb-2">{catName}</p>
-                      {item.description && (
-                        <p className="text-sm text-slate-500 line-clamp-2 mb-3">{item.description}</p>
-                      )}
-
-                      <div className="font-bold text-slate-900 mb-3">
-                        LKR {item.price.toFixed(2)}
-                      </div>
-
-                      {item.tags && item.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-4">
-                          {item.tags.map((tag, idx) => (
-                            <span key={idx} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="pt-3 mt-auto border-t border-slate-100 flex items-center justify-between">
-                      <span className="text-sm text-slate-600 font-medium">Available</span>
-                      <Switch
-                        checked={item.isAvailable}
-                        onCheckedChange={() => handleToggle(item._id, item.isAvailable)}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
+              {filteredItems.map((item) => (
+                <MenuItemCard 
+                  key={item._id} 
+                  item={item} 
+                  categories={categories}
+                  handleOpenSheet={handleOpenSheet}
+                  setDeleteTarget={setDeleteTarget}
+                  handleToggle={handleToggle}
+                />
+              ))}
             </div>
           )}
         </>
@@ -306,20 +371,77 @@ export default function MenuItems() {
                   placeholder="e.g. Margherita Pizza"
                 />
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    name="price"
-                    label="Price (LKR)"
-                    control={methods.control}
-                    type="number"
-                  />
-                  <FormSelect
-                    name="categoryId"
-                    label="Category"
-                    control={methods.control}
-                    options={categories.map(c => ({ value: c._id, label: c.name }))}
-                    placeholder="Select category"
-                  />
+                  {variantFields.length === 0 && (
+                    <FormField
+                      name="price"
+                      label="Base Price (LKR)"
+                      control={methods.control}
+                      type="number"
+                    />
+                  )}
+                  <div className={variantFields.length > 0 ? "col-span-2" : ""}>
+                    <FormSelect
+                      name="categoryId"
+                      label="Category"
+                      control={methods.control}
+                      options={categories.map(c => ({ value: c._id, label: c.name }))}
+                      placeholder="Select category"
+                    />
+                  </div>
                 </div>
+
+                <div className="border border-slate-200 rounded-lg p-4 space-y-4 bg-slate-50/50">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-sm font-semibold">Portions & Sizes (Optional)</Label>
+                      <p className="text-xs text-slate-500">Add variations like Small, Medium, Large</p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendVariant({ name: "", price: 0 })}
+                    >
+                      <Plus className="h-4 w-4 mr-1.5" /> Add Size
+                    </Button>
+                  </div>
+                  
+                  {variantFields.map((field, index) => (
+                    <div key={field.id} className="flex items-start gap-3 bg-white p-3 rounded-md border border-slate-200 shadow-sm">
+                      <div className="flex-1">
+                        <Input
+                          {...methods.register(`variants.${index}.name`)}
+                          placeholder="Size Name (e.g. Large)"
+                          className="mb-1"
+                        />
+                        {methods.formState.errors.variants?.[index]?.name && (
+                          <p className="text-[0.8rem] font-medium text-red-500">{methods.formState.errors.variants[index].name?.message as string}</p>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <Input
+                          {...methods.register(`variants.${index}.price`)}
+                          type="number"
+                          placeholder="Price"
+                          className="mb-1"
+                        />
+                        {methods.formState.errors.variants?.[index]?.price && (
+                          <p className="text-[0.8rem] font-medium text-red-500">{methods.formState.errors.variants[index].price?.message as string}</p>
+                        )}
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeVariant(index)}
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
                 <FormTextarea
                   name="description"
                   label="Description"
