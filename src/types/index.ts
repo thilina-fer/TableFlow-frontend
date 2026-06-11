@@ -21,6 +21,8 @@ export interface Restaurant {
 export interface User {
   _id: string
   restaurantId: string
+  restaurantName?: string
+  restaurant?: Restaurant
   name: string
   email: string
   role: "admin" | "kitchen" | "waiter" | "cashier"
