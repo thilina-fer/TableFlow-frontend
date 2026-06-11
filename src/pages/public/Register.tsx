@@ -14,7 +14,6 @@ import { FormField, FormTextarea, FormSelect } from "@/components/forms"
 import { ErrorAlert } from "@/components/shared"
 import { PageTransition } from "@/components/layout/PageTransition"
 
-
 const registerSchema = z.object({
   name: z.string().min(2, "Min 2 characters").max(100),
   ownerName: z.string().min(2, "Min 2 characters").max(100),
@@ -132,281 +131,281 @@ export const Register = () => {
     <PageTransition>
       <div className="w-full min-h-screen lg:grid lg:grid-cols-2 bg-slate-50">
         {/* Left Side: Image overlay */}
-      <div className="hidden lg:block relative h-full w-full">
-        <img
-          src={loginImage}
-          alt="Restaurant background"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+        <div className="hidden lg:block relative h-full w-full">
+          <img
+            src={loginImage}
+            alt="Restaurant background"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
 
-        <div className="absolute bottom-16 left-12 right-12 text-white">
-          <h1 className="text-5xl font-bold mb-6 leading-tight text-white tracking-tight">
-            Elevate your<br />restaurant operations.
-          </h1>
-          <p className="text-lg text-slate-200/90 max-w-lg leading-relaxed">
-            Streamline your workflow from host stand to kitchen with TableFlow's intuitive management suite.
-          </p>
-        </div>
-      </div>
-
-      {/* Right Side: Form */}
-      <div className="flex items-center justify-center p-8 sm:p-12 h-full overflow-y-auto">
-        <div className="w-full max-w-[480px]">
-          {/* Progress Indicator */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-orange-500 uppercase tracking-wider">
-                Step {step} of 3
-              </span>
-              <span className="text-sm text-slate-500 font-medium">
-                {step === 1 && "Owner Details"}
-                {step === 2 && "Restaurant Information"}
-                {step === 3 && "Branding"}
-              </span>
-            </div>
-            <div className="flex gap-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className={`h-2 flex-1 rounded-full transition-all duration-300 ${i <= step ? "bg-orange-500" : "bg-slate-200"
-                    }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-900 mb-2">
-              {step === 1 && "Owner Details"}
-              {step === 2 && "Restaurant Info"}
-              {step === 3 && "Add your Branding"}
-            </h2>
-            <p className="text-sm text-slate-500">
-              {step === 1 && "Tell us about yourself. You will be the primary super admin."}
-              {step === 2 && "Where is your restaurant located and what do you serve?"}
-              {step === 3 && "Upload your logo and cover image. (Optional)"}
+          <div className="absolute bottom-16 left-12 right-12 text-white">
+            <h1 className="text-5xl font-bold mb-6 leading-tight text-white tracking-tight">
+              Elevate your<br />restaurant operations.
+            </h1>
+            <p className="text-lg text-slate-200/90 max-w-lg leading-relaxed">
+              Streamline your workflow from host stand to kitchen with TableFlow's intuitive management suite.
             </p>
           </div>
+        </div>
 
-          {errorMsg && (
-            <div className="mb-6">
-              <ErrorAlert message={errorMsg} />
+        {/* Right Side: Form */}
+        <div className="flex items-center justify-center p-8 sm:p-12 h-full overflow-y-auto">
+          <div className="w-full max-w-[480px]">
+            {/* Progress Indicator */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-orange-500 uppercase tracking-wider">
+                  Step {step} of 3
+                </span>
+                <span className="text-sm text-slate-500 font-medium">
+                  {step === 1 && "Owner Details"}
+                  {step === 2 && "Restaurant Information"}
+                  {step === 3 && "Branding"}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className={`h-2 flex-1 rounded-full transition-all duration-300 ${i <= step ? "bg-orange-500" : "bg-slate-200"
+                      }`}
+                  />
+                ))}
+              </div>
             </div>
-          )}
 
-          <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-slate-900 mb-2">
+                {step === 1 && "Owner Details"}
+                {step === 2 && "Restaurant Info"}
+                {step === 3 && "Add your Branding"}
+              </h2>
+              <p className="text-sm text-slate-500">
+                {step === 1 && "Tell us about yourself. You will be the primary super admin."}
+                {step === 2 && "Where is your restaurant located and what do you serve?"}
+                {step === 3 && "Upload your logo and cover image. (Optional)"}
+              </p>
+            </div>
 
-              {/* STAGE 1: OWNER DETAILS */}
-              {step === 1 && (
-                <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <FormField
-                    name="ownerName"
-                    label="Full Name"
-                    control={methods.control}
-                    placeholder="John Doe"
-                  />
-                  <FormField
-                    name="ownerEmail"
-                    label="Email Address"
-                    control={methods.control}
-                    type="email"
-                    placeholder="john@example.com"
-                  />
-                  <FormField
-                    name="ownerPhone"
-                    label="Phone Number"
-                    control={methods.control}
-                    placeholder="+1 234 567 8900"
-                  />
+            {errorMsg && (
+              <div className="mb-6">
+                <ErrorAlert message={errorMsg} />
+              </div>
+            )}
 
-                  <Button
-                    type="button"
-                    onClick={handleNextStep}
-                    className="w-full h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base rounded-md mt-6"
-                  >
-                    Continue
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </div>
-              )}
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-              {/* STAGE 2: RESTAURANT INFO */}
-              {step === 2 && (
-                <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <FormField
-                    name="name"
-                    label="Restaurant Name"
-                    control={methods.control}
-                    placeholder="e.g. The Golden Fork"
-                  />
-                  <FormSelect
-                    name="restaurantType"
-                    label="Restaurant Type"
-                    control={methods.control}
-                    options={typeOptions}
-                    placeholder="Select type"
-                  />
-                  <FormField
-                    name="address"
-                    label="Street Address"
-                    control={methods.control}
-                    placeholder="123 Main St, Suite 100"
-                  />
-                  <FormField
-                    name="city"
-                    label="City"
-                    control={methods.control}
-                    placeholder="New York"
-                  />
-                  <FormTextarea
-                    name="description"
-                    label="Description"
-                    control={methods.control}
-                    rows={3}
-                    placeholder="Tell us a bit about your restaurant..."
-                  />
+                {/* STAGE 1: OWNER DETAILS */}
+                {step === 1 && (
+                  <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <FormField
+                      name="ownerName"
+                      label="Full Name"
+                      control={methods.control}
+                      placeholder="John Doe"
+                    />
+                    <FormField
+                      name="ownerEmail"
+                      label="Email Address"
+                      control={methods.control}
+                      type="email"
+                      placeholder="john@example.com"
+                    />
+                    <FormField
+                      name="ownerPhone"
+                      label="Phone Number"
+                      control={methods.control}
+                      placeholder="+1 234 567 8900"
+                    />
 
-                  <div className="flex gap-4 mt-6">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handlePrevStep}
-                      className="h-11 px-4 border-slate-200 hover:bg-slate-100"
-                    >
-                      <ArrowLeft className="h-5 w-5" />
-                    </Button>
                     <Button
                       type="button"
                       onClick={handleNextStep}
-                      className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base rounded-md"
+                      className="w-full h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base rounded-md mt-6"
                     >
                       Continue
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* STAGE 3: BRANDING (FILE UPLOADS) */}
-              {step === 3 && (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-
-                  {/* Logo Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Restaurant Logo</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      ref={logoInputRef}
-                      onChange={(e) => handleImageSelect(e, "logo")}
+                {/* STAGE 2: RESTAURANT INFO */}
+                {step === 2 && (
+                  <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <FormField
+                      name="name"
+                      label="Restaurant Name"
+                      control={methods.control}
+                      placeholder="e.g. The Golden Fork"
+                    />
+                    <FormSelect
+                      name="restaurantType"
+                      label="Restaurant Type"
+                      control={methods.control}
+                      options={typeOptions}
+                      placeholder="Select type"
+                    />
+                    <FormField
+                      name="address"
+                      label="Street Address"
+                      control={methods.control}
+                      placeholder="123 Main St, Suite 100"
+                    />
+                    <FormField
+                      name="city"
+                      label="City"
+                      control={methods.control}
+                      placeholder="New York"
+                    />
+                    <FormTextarea
+                      name="description"
+                      label="Description"
+                      control={methods.control}
+                      rows={3}
+                      placeholder="Tell us a bit about your restaurant..."
                     />
 
-                    {!logoPreview ? (
-                      <div
-                        onClick={() => logoInputRef.current?.click()}
-                        className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-orange-400 hover:text-orange-500 transition-colors cursor-pointer"
+                    <div className="flex gap-4 mt-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handlePrevStep}
+                        className="h-11 px-4 border-slate-200 hover:bg-slate-100"
                       >
-                        <Upload className="h-8 w-8 mb-2" />
-                        <span className="text-sm font-medium">Click to upload logo</span>
-                        <span className="text-xs mt-1 opacity-70">PNG, JPG up to 5MB</span>
-                      </div>
-                    ) : (
-                      <div className="relative border rounded-lg p-4 flex items-center gap-4 bg-white shadow-sm">
-                        <img src={logoPreview} alt="Logo preview" className="w-16 h-16 object-cover rounded-md border" />
-                        <div className="flex-1 truncate">
-                          <p className="text-sm font-medium text-slate-900 truncate">{logoFile?.name}</p>
-                          <p className="text-xs text-slate-500">{(logoFile?.size ? (logoFile.size / 1024 / 1024).toFixed(2) : 0)} MB</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeImage("logo")}
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
-                        >
-                          <X className="h-5 w-5" />
-                        </button>
-                      </div>
-                    )}
+                        <ArrowLeft className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={handleNextStep}
+                        className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base rounded-md"
+                      >
+                        Continue
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                    </div>
                   </div>
+                )}
 
-                  {/* Cover Image Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Cover Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      ref={coverInputRef}
-                      onChange={(e) => handleImageSelect(e, "cover")}
-                    />
+                {/* STAGE 3: BRANDING (FILE UPLOADS) */}
+                {step === 3 && (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
 
-                    {!coverPreview ? (
-                      <div
-                        onClick={() => coverInputRef.current?.click()}
-                        className="border-2 border-dashed border-slate-300 rounded-lg p-8 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-orange-400 hover:text-orange-500 transition-colors cursor-pointer"
-                      >
-                        <ImageIcon className="h-10 w-10 mb-2" />
-                        <span className="text-sm font-medium">Click to upload cover image</span>
-                        <span className="text-xs mt-1 opacity-70">Recommended size: 1200 x 400px</span>
-                      </div>
-                    ) : (
-                      <div className="relative border rounded-lg overflow-hidden bg-white shadow-sm group">
-                        <img src={coverPreview} alt="Cover preview" className="w-full h-32 object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    {/* Logo Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Restaurant Logo</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={logoInputRef}
+                        onChange={(e) => handleImageSelect(e, "logo")}
+                      />
+
+                      {!logoPreview ? (
+                        <div
+                          onClick={() => logoInputRef.current?.click()}
+                          className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-orange-400 hover:text-orange-500 transition-colors cursor-pointer"
+                        >
+                          <Upload className="h-8 w-8 mb-2" />
+                          <span className="text-sm font-medium">Click to upload logo</span>
+                          <span className="text-xs mt-1 opacity-70">PNG, JPG up to 5MB</span>
+                        </div>
+                      ) : (
+                        <div className="relative border rounded-lg p-4 flex items-center gap-4 bg-white shadow-sm">
+                          <img src={logoPreview} alt="Logo preview" className="w-16 h-16 object-cover rounded-md border" />
+                          <div className="flex-1 truncate">
+                            <p className="text-sm font-medium text-slate-900 truncate">{logoFile?.name}</p>
+                            <p className="text-xs text-slate-500">{(logoFile?.size ? (logoFile.size / 1024 / 1024).toFixed(2) : 0)} MB</p>
+                          </div>
                           <button
                             type="button"
-                            onClick={() => removeImage("cover")}
-                            className="bg-white/20 hover:bg-red-500 text-white rounded-full p-2 backdrop-blur-sm transition-colors"
+                            onClick={() => removeImage("logo")}
+                            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-colors"
                           >
                             <X className="h-5 w-5" />
                           </button>
                         </div>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-4 mt-8">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handlePrevStep}
-                      className="h-11 px-4 border-slate-200 hover:bg-slate-100"
-                      disabled={isSubmitting}
-                    >
-                      <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base rounded-md"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Submit Application"
                       )}
-                    </Button>
+                    </div>
+
+                    {/* Cover Image Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">Cover Image</label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        ref={coverInputRef}
+                        onChange={(e) => handleImageSelect(e, "cover")}
+                      />
+
+                      {!coverPreview ? (
+                        <div
+                          onClick={() => coverInputRef.current?.click()}
+                          className="border-2 border-dashed border-slate-300 rounded-lg p-8 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-orange-400 hover:text-orange-500 transition-colors cursor-pointer"
+                        >
+                          <ImageIcon className="h-10 w-10 mb-2" />
+                          <span className="text-sm font-medium">Click to upload cover image</span>
+                          <span className="text-xs mt-1 opacity-70">Recommended size: 1200 x 400px</span>
+                        </div>
+                      ) : (
+                        <div className="relative border rounded-lg overflow-hidden bg-white shadow-sm group">
+                          <img src={coverPreview} alt="Cover preview" className="w-full h-32 object-cover" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <button
+                              type="button"
+                              onClick={() => removeImage("cover")}
+                              className="bg-white/20 hover:bg-red-500 text-white rounded-full p-2 backdrop-blur-sm transition-colors"
+                            >
+                              <X className="h-5 w-5" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-4 mt-8">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handlePrevStep}
+                        className="h-11 px-4 border-slate-200 hover:bg-slate-100"
+                        disabled={isSubmitting}
+                      >
+                        <ArrowLeft className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="flex-1 h-11 bg-orange-500 hover:bg-orange-600 text-white font-medium text-base rounded-md"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          "Submit Application"
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-            </form>
-          </FormProvider>
+              </form>
+            </FormProvider>
 
-          <div className="mt-8 text-center text-sm font-medium text-slate-500">
-            Already registered?{" "}
-            <Link to="/login" className="text-orange-500 hover:text-orange-600 hover:underline">
-              Log in here
-            </Link>
+            <div className="mt-8 text-center text-sm font-medium text-slate-500">
+              Already registered?{" "}
+              <Link to="/login" className="text-orange-500 hover:text-orange-600 hover:underline">
+                Log in here
+              </Link>
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </PageTransition>
   )
 }
