@@ -6,6 +6,7 @@ import { clearCredentials, selectCurrentUser } from "@/features/auth/authSlice"
 import { RoleBadge } from "@/components/shared/RoleBadge"
 import { Button } from "@/components/ui/button"
 import { theme } from "@/lib/theme"
+import { PageTransition } from "@/components/layout/PageTransition"
 
 interface StaffLayoutProps {
   children: React.ReactNode
@@ -52,8 +53,10 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto p-0">
-        {children}
+      <div className="flex-1 overflow-auto p-0 relative">
+        <PageTransition>
+          {children}
+        </PageTransition>
       </div>
     </div>
   )

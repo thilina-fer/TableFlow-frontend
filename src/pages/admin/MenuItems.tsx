@@ -1,13 +1,12 @@
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useState } from "react"
 import { useForm, FormProvider } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { UtensilsCrossed, MoreVertical, Edit, Trash, Loader2, Upload, X } from "lucide-react"
+import { UtensilsCrossed, MoreVertical, Edit, Trash, Loader2 } from "lucide-react"
 
 import { MenuItemService } from "@/services/menuItem.service"
 import { CategoryService } from "@/services/category.service"
-import { RestaurantService } from "@/services/restaurant.service"
 import type { MenuItem, Category } from "@/types"
 import { theme } from "@/lib/theme"
 
@@ -26,7 +25,7 @@ const menuItemSchema = z.object({
   description: z.string().max(500).optional(),
   price: z.coerce.number().positive("Must be positive"),
   categoryId: z.string().min(1, "Select a category"),
-  imageUrl: z.any().optional(),
+  imageUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   preparationTimeMinutes: z.coerce.number().int().min(1).max(300).optional().or(z.literal("")),
   isAvailable: z.boolean().default(true),
   tags: z.string().optional(),
@@ -44,10 +43,6 @@ export default function MenuItems() {
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<MenuItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
-
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const imageInputRef = useRef<HTMLInputElement>(null)
 
   const methods = useForm<any>({
     resolver: zodResolver(menuItemSchema),
@@ -84,10 +79,6 @@ export default function MenuItems() {
   }, [])
 
   const handleOpenSheet = (item?: MenuItem) => {
-    setImageFile(null)
-    setImagePreview(item?.imageUrl || null)
-    if (imageInputRef.current) imageInputRef.current.value = ""
-
     if (item) {
       setEditTarget(item)
       methods.reset({
@@ -116,35 +107,13 @@ export default function MenuItems() {
     setSheetOpen(true)
   }
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      setImageFile(file)
-      setImagePreview(URL.createObjectURL(file))
-    }
-  }
-
-  const removeImage = () => {
-    setImageFile(null)
-    setImagePreview(null)
-    if (imageInputRef.current) imageInputRef.current.value = ""
-  }
-
   const onSubmit = async (data: MenuItemFormValues) => {
     try {
-      let finalImageUrl = editTarget?.imageUrl || ""
-
-      if (imageFile) {
-        finalImageUrl = await RestaurantService.uploadImage(imageFile)
-      } else if (!imagePreview) {
-        finalImageUrl = ""
-      }
-
       const formattedData = {
         ...data,
         preparationTimeMinutes: data.preparationTimeMinutes === "" ? undefined : Number(data.preparationTimeMinutes),
-        tags: data.tags ? (data.tags as unknown as string).split(",").map(t => t.trim()).filter(Boolean) : [],
-        imageUrl: finalImageUrl === "" ? undefined : finalImageUrl,
+        tags: data.tags ? data.tags.split(",").map(t => t.trim()).filter(Boolean) : [],
+        imageUrl: data.imageUrl === "" ? undefined : data.imageUrl,
         description: data.description === "" ? undefined : data.description
       }
 
@@ -339,40 +308,12 @@ export default function MenuItems() {
                   control={methods.control}
                   placeholder="Brief description of the item"
                 />
-                <div className="space-y-2">
-                  <Label>Item Image</Label>
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    ref={imageInputRef}
-                    onChange={handleImageSelect}
-                  />
-                  
-                  {!imagePreview ? (
-                    <div 
-                      onClick={() => imageInputRef.current?.click()}
-                      className="border-2 border-dashed border-slate-300 rounded-lg p-6 flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:border-orange-400 hover:text-orange-500 transition-colors cursor-pointer"
-                    >
-                      <Upload className="h-8 w-8 mb-2" />
-                      <span className="text-sm font-medium">Click to upload image</span>
-                      <span className="text-xs mt-1 opacity-70">PNG, JPG up to 5MB</span>
-                    </div>
-                  ) : (
-                    <div className="relative border rounded-lg overflow-hidden bg-white shadow-sm group">
-                      <img src={imagePreview} alt="Preview" className="w-full h-40 object-cover" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <button 
-                          type="button" 
-                          onClick={removeImage}
-                          className="bg-white/20 hover:bg-red-500 text-white rounded-full p-2 backdrop-blur-sm transition-colors"
-                        >
-                          <X className="h-5 w-5" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <FormField
+                  name="imageUrl"
+                  label="Image URL"
+                  control={methods.control}
+                  placeholder="https://example.com/image.jpg"
+                />
                 <FormField
                   name="preparationTimeMinutes"
                   label="Prep Time (minutes)"

@@ -14,6 +14,7 @@ import { FormField } from "@/components/forms"
 import { ErrorAlert } from "@/components/shared"
 import { ROLE_REDIRECT } from "@/lib/constants"
 import loginImage from "@/assets/image.png"
+import { PageTransition } from "@/components/layout/PageTransition"
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -64,8 +65,9 @@ export const Login = () => {
   }
 
   return (
-    <div className="w-full min-h-screen lg:grid lg:grid-cols-2 bg-slate-50">
-      {/* Left Side: Image overlay */}
+    <PageTransition>
+      <div className="w-full min-h-screen lg:grid lg:grid-cols-2 bg-slate-50">
+        {/* Left Side: Image overlay */}
       <div className="hidden lg:block relative h-full w-full">
         <img 
           src={loginImage} 
@@ -166,6 +168,7 @@ export const Login = () => {
         </div>
       </div>
     </div>
+    </PageTransition>
   )
 }
 

@@ -1,5 +1,5 @@
 import React from "react"
-import { Outlet, NavLink, useNavigate } from "react-router-dom"
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom"
 import {
   LayoutDashboard,
   ClipboardList,
@@ -12,10 +12,12 @@ import { useAppDispatch, useAppSelector } from "@/app/hooks"
 import { clearSuperAdminCredentials, selectSuperAdmin } from "@/features/superAdmin/superAdminSlice"
 import { theme } from "@/lib/theme"
 import { Button } from "@/components/ui/button"
-
+import { AnimatePresence } from "framer-motion"
+import { PageTransition } from "@/components/layout/PageTransition"
 export const SuperAdminLayout: React.FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const superAdmin = useAppSelector(selectSuperAdmin)
 
   const navLinks = [
@@ -81,8 +83,12 @@ export const SuperAdminLayout: React.FC = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-6">
-          <Outlet />
+        <main className="flex-1 overflow-auto p-6 bg-slate-50 relative">
+          <AnimatePresence mode="wait">
+            <PageTransition key={location.pathname}>
+              <Outlet />
+            </PageTransition>
+          </AnimatePresence>
         </main>
       </div>
     </div>

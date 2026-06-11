@@ -1,5 +1,5 @@
 import React from "react"
-import { Outlet, NavLink, useNavigate } from "react-router-dom"
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom"
 import {
   LayoutDashboard,
   UtensilsCrossed,
@@ -14,10 +14,13 @@ import { clearCredentials, selectCurrentUser } from "@/features/auth/authSlice"
 import { theme } from "@/lib/theme"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { AnimatePresence } from "framer-motion"
+import { PageTransition } from "@/components/layout/PageTransition"
 
 export const AdminLayout: React.FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const user = useAppSelector(selectCurrentUser)
 
   const navLinks = [
@@ -105,8 +108,12 @@ export const AdminLayout: React.FC = () => {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-6">
-          <Outlet />
+        <main className="flex-1 overflow-auto p-6 bg-slate-50 relative">
+          <AnimatePresence mode="wait">
+            <PageTransition key={location.pathname}>
+              <Outlet />
+            </PageTransition>
+          </AnimatePresence>
         </main>
       </div>
     </div>

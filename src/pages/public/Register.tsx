@@ -12,6 +12,7 @@ import loginImage from "@/assets/image2.png"
 import { Button } from "@/components/ui/button"
 import { FormField, FormTextarea, FormSelect } from "@/components/forms"
 import { ErrorAlert } from "@/components/shared"
+import { PageTransition } from "@/components/layout/PageTransition"
 
 
 const registerSchema = z.object({
@@ -113,21 +114,11 @@ export const Register = () => {
   const onSubmit = async (data: RegisterFormValues) => {
     setErrorMsg(null)
     try {
-      let finalLogoUrl = ""
-      let finalCoverUrl = ""
-
-      if (logoFile) {
-        finalLogoUrl = await RestaurantService.uploadImage(logoFile)
-      }
-      
-      if (coverFile) {
-        finalCoverUrl = await RestaurantService.uploadImage(coverFile)
-      }
-
+      // Temporary: Use placeholder URLs since Cloudinary isn't connected
       const payload = {
         ...data,
-        logoUrl: finalLogoUrl,
-        coverImageUrl: finalCoverUrl,
+        logoUrl: logoFile ? "https://placehold.co/400x400/png?text=Logo" : "",
+        coverImageUrl: coverFile ? "https://placehold.co/1200x400/png?text=Cover" : "",
       }
 
       await RestaurantService.register(payload)
@@ -138,8 +129,9 @@ export const Register = () => {
   }
 
   return (
-    <div className="w-full min-h-screen lg:grid lg:grid-cols-2 bg-slate-50">
-      {/* Left Side: Image overlay */}
+    <PageTransition>
+      <div className="w-full min-h-screen lg:grid lg:grid-cols-2 bg-slate-50">
+        {/* Left Side: Image overlay */}
       <div className="hidden lg:block relative h-full w-full">
         <img
           src={loginImage}
@@ -415,6 +407,7 @@ export const Register = () => {
         </div>
       </div>
     </div>
+    </PageTransition>
   )
 }
 

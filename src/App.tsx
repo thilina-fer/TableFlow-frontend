@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom"
+import { AnimatePresence } from "framer-motion"
 
 // Layouts
 import AdminLayout from "@/components/layout/AdminLayout"
@@ -39,10 +40,12 @@ const Restaurants = () => <div className="text-xl">Restaurants</div>
 const SuperAdminAnalytics = () => <div className="text-xl">Super Admin Analytics</div>
 const AuditLog = () => <div className="text-xl">Audit Log</div>
 
-export default function App() {
+const AnimatedRoutes = () => {
+  const location = useLocation()
+  
   return (
-    <BrowserRouter>
-      <Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname.split('/')[1] || '/'}>
         {/* Public Routes */}
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
@@ -138,6 +141,14 @@ export default function App() {
         {/* Fallback */}
         <Route path="*" element={<NotFound />} />
       </Routes>
+    </AnimatePresence>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AnimatedRoutes />
     </BrowserRouter>
   )
 }

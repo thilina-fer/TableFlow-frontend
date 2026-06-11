@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { FormField } from "@/components/forms"
 import { ErrorAlert } from "@/components/shared"
 import { theme } from "@/lib/theme"
+import { PageTransition } from "@/components/layout/PageTransition"
 
 
 const superAdminLoginSchema = z.object({
@@ -59,8 +60,9 @@ export const SuperAdminLogin = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg border-slate-200">
+    <PageTransition>
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-50">
+        <Card className="w-full max-w-md shadow-lg border-slate-200">
         <CardHeader className="space-y-4 pb-6">
           <div className="flex items-center gap-3">
             <div className="bg-slate-900 rounded-xl p-2 text-white">
@@ -130,8 +132,9 @@ export const SuperAdminLogin = () => {
         <Link to="/login" className="text-brand hover:underline font-medium">
           Click here
         </Link>
+        </div>
       </div>
-    </div>
+    </PageTransition>
   )
 }
 
