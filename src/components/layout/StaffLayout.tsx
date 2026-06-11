@@ -6,7 +6,7 @@ import { clearCredentials, selectCurrentUser } from "@/features/auth/authSlice"
 import { RoleBadge } from "@/components/shared/RoleBadge"
 import { Button } from "@/components/ui/button"
 import { theme } from "@/lib/theme"
-import { PageTransition } from "@/components/layout/PageTransition"
+import logoImage from "@/assets/logo.png"
 
 interface StaffLayoutProps {
   children: React.ReactNode
@@ -26,8 +26,8 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
     <div className="flex flex-col h-screen w-full bg-slate-50">
       {/* Topbar */}
       <header className={theme.topbar}>
-        <div className="flex items-center">
-          <span className="text-xl font-bold text-brand tracking-tight">TableFlow</span>
+        <div className="flex items-center gap-2">
+          <img src={logoImage} alt="TableFlow Logo" className="h-7 w-auto object-contain" />
         </div>
         
         {user?.role && (
@@ -53,10 +53,8 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto p-0 relative">
-        <PageTransition>
-          {children}
-        </PageTransition>
+      <div className="flex-1 overflow-auto p-0">
+        {children}
       </div>
     </div>
   )
