@@ -52,6 +52,7 @@ export interface MenuItem {
   name: string
   description?: string
   price: number
+  variants?: { name: string; price: number }[]
   imageUrl?: string
   isAvailable: boolean
   preparationTimeMinutes?: number
@@ -71,6 +72,7 @@ export interface Table {
 export interface OrderItem {
   menuItemId: string
   name: string
+  variantName?: string
   quantity: number
   price: number
   subtotal: number
@@ -108,6 +110,7 @@ export interface AuditLog {
 export interface CartItem {
   menuItemId: string
   name: string
+  variantName?: string
   price: number
   quantity: number
   imageUrl?: string
