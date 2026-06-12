@@ -24,15 +24,21 @@ import Staff from "@/pages/admin/Staff"
 import Registrations from "@/pages/superadmin/Registrations"
 import RegistrationDetail from "@/pages/superadmin/RegistrationDetail"
 
+import CustomerMenu from "@/pages/public/CustomerMenu"
+import OrderTracking from "@/pages/public/OrderTracking"
+import CardPayment from "@/pages/public/CardPayment"
+
+import Dashboard from "@/pages/admin/Dashboard"
+import Onboarding from "@/pages/admin/Onboarding"
+
+import Kitchen from "@/pages/staff/Kitchen"
+import Waiter from "@/pages/staff/Waiter"
+import Cashier from "@/pages/staff/Cashier"
+
 // Placeholder components
 const NotFound = () => <div className="p-8 text-center text-xl">404 - Not Found</div>
 
-const AdminDashboard = () => <div className="text-xl">Admin Dashboard</div>
 const AdminAnalytics = () => <div className="text-xl">Admin Analytics</div>
-
-const KitchenPortal = () => <div className="p-6 text-xl">Kitchen Portal</div>
-const WaiterPortal = () => <div className="p-6 text-xl">Waiter Portal</div>
-const CashierPortal = () => <div className="p-6 text-xl">Cashier Portal</div>
 
 const SuperAdminDashboard = () => <div className="text-xl">Super Admin Dashboard</div>
 const Restaurants = () => <div className="text-xl">Restaurants</div>
@@ -51,6 +57,11 @@ const AnimatedRoutes = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/register/success" element={<RegisterSuccess />} />
         <Route path="/showcase" element={<Showcase />} />
+        
+        {/* Customer Public Ordering Routes */}
+        <Route path="/menu" element={<CustomerMenu />} />
+        <Route path="/order/:id/track" element={<OrderTracking />} />
+        <Route path="/order/:id/pay" element={<CardPayment />} />
 
         {/* Protected - Change Password for First Login */}
         <Route
@@ -73,7 +84,8 @@ const AnimatedRoutes = () => {
             </ProtectedRoute>
           }
         >
-          <Route index element={<AdminDashboard />} />
+          <Route index element={<Dashboard />} />
+          <Route path="onboarding" element={<Onboarding />} />
           <Route path="menu" element={<MenuItems />} />
           <Route path="categories" element={<Categories />} />
           <Route path="tables" element={<Tables />} />
@@ -88,7 +100,7 @@ const AnimatedRoutes = () => {
             <ProtectedRoute roles={["kitchen"]}>
               <FirstLoginGuard>
                 <StaffLayout>
-                  <KitchenPortal />
+                  <Kitchen />
                 </StaffLayout>
               </FirstLoginGuard>
             </ProtectedRoute>
@@ -100,7 +112,7 @@ const AnimatedRoutes = () => {
             <ProtectedRoute roles={["waiter"]}>
               <FirstLoginGuard>
                 <StaffLayout>
-                  <WaiterPortal />
+                  <Waiter />
                 </StaffLayout>
               </FirstLoginGuard>
             </ProtectedRoute>
@@ -112,7 +124,7 @@ const AnimatedRoutes = () => {
             <ProtectedRoute roles={["cashier"]}>
               <FirstLoginGuard>
                 <StaffLayout>
-                  <CashierPortal />
+                  <Cashier />
                 </StaffLayout>
               </FirstLoginGuard>
             </ProtectedRoute>
