@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Clock, LogOut, Check, Receipt, Loader2, Download } from "lucide-react"
+import { Clock, Check, Receipt, Loader2, Download } from "lucide-react"
 
 import { getCashierOrders, markCashPayment, downloadBill } from "@/api/order.api"
 import { useSocket } from "@/hooks/useSocket"
-import { useAppSelector, useAppDispatch } from "@/app/hooks"
-import { selectAccessToken, clearCredentials as logout } from "@/features/auth/authSlice"
+import { useAppSelector } from "@/app/hooks"
+import { selectAccessToken } from "@/features/auth/authSlice"
 import type { Order } from "@/types"
 import { timeAgo, formatPrice, downloadBlob } from "@/lib/utils"
 import { theme } from "@/lib/theme"
@@ -14,21 +14,14 @@ import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared"
 
 export default function Cashier() {
-  const dispatch = useAppDispatch()
   const token = useAppSelector(selectAccessToken)
   const { socket } = useSocket({ token: token || undefined })
   
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   
-  const [currentTime, setCurrentTime] = useState(new Date())
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -90,35 +83,24 @@ export default function Cashier() {
     }
   }
 
-  if (loading) return <div className="min-h-screen bg-slate-900 flex items-center justify-center"><Loader2 className="animate-spin text-brand h-8 w-8" /></div>
+  if (loading) return <div className="flex h-full items-center justify-center"><Loader2 className="animate-spin text-orange-500 h-8 w-8" /></div>
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100">
-      {/* Topbar */}
-      <div className="h-16 bg-slate-900 text-white flex items-center justify-between px-6 shrink-0 shadow-md z-10">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-            <span className="text-orange-500 text-lg">💰</span>
-          </div>
-          <h1 className="text-xl font-bold tracking-tight">Cashier Portal</h1>
-        </div>
-        
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${socket?.connected ? "bg-green-500" : "bg-red-500"}`} />
-            <span className="text-sm font-medium text-slate-300 font-mono">
-              {currentTime.toLocaleTimeString("en-US", { hour12: true })}
+    <div className="flex flex-col h-full max-w-7xl mx-auto w-full">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Cashier Dashboard</h1>
+          <div className="flex items-center gap-2 mt-1">
+            <div className={`w-2 h-2 rounded-full ${socket?.connected ? "bg-green-500" : "bg-red-500"} shadow-sm`} />
+            <span className="text-sm text-slate-500 font-medium">
+              {socket?.connected ? "System Connected" : "Connecting..."}
             </span>
           </div>
-          <Button variant="ghost" size="sm" onClick={() => dispatch(logout())} className="text-slate-400 hover:text-white hover:bg-slate-800">
-            <LogOut size={16} className="mr-2" /> Logout
-          </Button>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-8">
-        <div className="max-w-3xl mx-auto space-y-4">
+      <div className="flex-1 overflow-y-auto pb-6">
+        <div className="space-y-4">
           
           {orders.length === 0 ? (
             <div className="pt-12">
@@ -130,7 +112,7 @@ export default function Cashier() {
             </div>
           ) : (
             orders.map(order => (
-              <div key={order._id} className={`${theme.card} p-5 sm:p-6 shadow-sm border-l-4 ${order.paymentStatus === 'paid' ? 'border-l-emerald-500' : 'border-l-orange-500'}`}>
+              <div key={order._id} className={`${theme.card} p-5 sm:p-6 shadow-sm border-l-4 ${order.paymentStatus === 'paid' ? 'border-l-emerald-500' : 'border-l-orange-500'} bg-white`}>
                 <div className="flex justify-between items-start mb-4 border-b border-slate-100 pb-4">
                   <div>
                     <h3 className="font-bold text-xl text-slate-900 flex items-center gap-2">
@@ -183,7 +165,7 @@ export default function Cashier() {
                       <Button 
                         onClick={() => handleMarkPaid(order._id)}
                         disabled={processingId === order._id}
-                        className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8"
+                        className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 shadow-sm shadow-emerald-500/20"
                       >
                         {processingId === order._id ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <><Check size={18} className="mr-2" /> Mark Paid</>}
                       </Button>

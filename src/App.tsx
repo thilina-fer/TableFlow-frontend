@@ -32,13 +32,16 @@ import Dashboard from "@/pages/admin/Dashboard"
 import Onboarding from "@/pages/admin/Onboarding"
 
 import Kitchen from "@/pages/staff/Kitchen"
+import KitchenHistory from "@/pages/staff/KitchenHistory"
 import Waiter from "@/pages/staff/Waiter"
+import WaiterHistory from "@/pages/staff/WaiterHistory"
 import Cashier from "@/pages/staff/Cashier"
 
 // Placeholder components
 const NotFound = () => <div className="p-8 text-center text-xl">404 - Not Found</div>
 
 const AdminAnalytics = () => <div className="text-xl">Admin Analytics</div>
+const WaiterDetailsPlaceholder = () => <div className="p-8 text-center text-slate-500 mt-10">Order Details feature coming soon</div>
 
 const SuperAdminDashboard = () => <div className="text-xl">Super Admin Dashboard</div>
 const Restaurants = () => <div className="text-xl">Restaurants</div>
@@ -107,12 +110,48 @@ const AnimatedRoutes = () => {
           }
         />
         <Route
+          path="/kitchen/history"
+          element={
+            <ProtectedRoute roles={["kitchen"]}>
+              <FirstLoginGuard>
+                <StaffLayout>
+                  <KitchenHistory />
+                </StaffLayout>
+              </FirstLoginGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/waiter"
           element={
             <ProtectedRoute roles={["waiter"]}>
               <FirstLoginGuard>
                 <StaffLayout>
                   <Waiter />
+                </StaffLayout>
+              </FirstLoginGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/waiter/history"
+          element={
+            <ProtectedRoute roles={["waiter"]}>
+              <FirstLoginGuard>
+                <StaffLayout>
+                  <WaiterHistory />
+                </StaffLayout>
+              </FirstLoginGuard>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/waiter/details"
+          element={
+            <ProtectedRoute roles={["waiter"]}>
+              <FirstLoginGuard>
+                <StaffLayout>
+                  <WaiterDetailsPlaceholder />
                 </StaffLayout>
               </FirstLoginGuard>
             </ProtectedRoute>
