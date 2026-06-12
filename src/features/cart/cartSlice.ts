@@ -17,6 +17,8 @@ const initialState: CartState = {
   paymentMethod: null,
 }
 
+const getItemId = (item: CartItem) => `${item.menuItemId}-${item.variantName || 'base'}`
+
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -26,7 +28,8 @@ export const cartSlice = createSlice({
       state.tableId = action.payload.tableId
     },
     addToCart: (state, action: PayloadAction<CartItem>) => {
-      const existingItem = state.items.find((item) => item.menuItemId === action.payload.menuItemId)
+      const payloadId = getItemId(action.payload)
+      const existingItem = state.items.find((item) => getItemId(item) === payloadId)
       if (existingItem) {
         existingItem.quantity += action.payload.quantity
       } else {
@@ -34,13 +37,13 @@ export const cartSlice = createSlice({
       }
     },
     removeFromCart: (state, action: PayloadAction<string>) => {
-      state.items = state.items.filter((item) => item.menuItemId !== action.payload)
+      state.items = state.items.filter((item) => getItemId(item) !== action.payload)
     },
-    updateQuantity: (state, action: PayloadAction<{ menuItemId: string; quantity: number }>) => {
+    updateQuantity: (state, action: PayloadAction<{ id: string; quantity: number }>) => {
       if (action.payload.quantity <= 0) {
-        state.items = state.items.filter((item) => item.menuItemId !== action.payload.menuItemId)
+        state.items = state.items.filter((item) => getItemId(item) !== action.payload.id)
       } else {
-        const item = state.items.find((item) => item.menuItemId === action.payload.menuItemId)
+        const item = state.items.find((item) => getItemId(item) === action.payload.id)
         if (item) {
           item.quantity = action.payload.quantity
         }
@@ -71,5 +74,6 @@ export const selectTableContext = (state: RootState) => ({
   restaurantId: state.cart.restaurantId,
   tableId: state.cart.tableId,
 })
+export const selectPaymentMethod = (state: RootState) => state.cart.paymentMethod
 
 export default cartSlice.reducer
