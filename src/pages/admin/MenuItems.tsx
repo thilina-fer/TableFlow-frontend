@@ -3,7 +3,7 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { UtensilsCrossed, MoreVertical, Edit, Trash, Loader2, Image, Upload, X, Plus } from "lucide-react"
+import { UtensilsCrossed, MoreVertical, Pencil, Trash2, Plus, X, Loader2, Image as ImageIcon } from "lucide-react"
 
 import { MenuItemService } from "@/services/menuItem.service"
 import { CategoryService } from "@/services/category.service"
@@ -81,13 +81,13 @@ const MenuItemCard = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={() => handleOpenSheet(item)}>
-                <Edit className="h-4 w-4 mr-2" /> Edit
+                <Pencil className="h-4 w-4 mr-2" /> Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setDeleteTarget(item._id)}
                 className="text-red-600 focus:bg-red-50 focus:text-red-700"
               >
-                <Trash className="h-4 w-4 mr-2" /> Delete
+                <Trash2 className="h-4 w-4 mr-2" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -174,6 +174,7 @@ export default function MenuItems() {
     },
   })
 
+  const { formState: { errors } } = methods
   const { fields: variantFields, append: appendVariant, remove: removeVariant } = useFieldArray({
     control: methods.control,
     name: "variants",
@@ -414,8 +415,8 @@ export default function MenuItems() {
                           placeholder="Size Name (e.g. Large)"
                           className="mb-1"
                         />
-                        {methods.formState.errors.variants?.[index]?.name && (
-                          <p className="text-[0.8rem] font-medium text-red-500">{methods.formState.errors.variants[index].name?.message as string}</p>
+                        {(errors.variants as any)?.[index]?.name && (
+                          <p className="text-sm text-red-500 mt-1">{(errors.variants as any)[index].name.message}</p>
                         )}
                       </div>
                       <div className="flex-1">
@@ -425,8 +426,8 @@ export default function MenuItems() {
                           placeholder="Price"
                           className="mb-1"
                         />
-                        {methods.formState.errors.variants?.[index]?.price && (
-                          <p className="text-[0.8rem] font-medium text-red-500">{methods.formState.errors.variants[index].price?.message as string}</p>
+                        {(errors.variants as any)?.[index]?.price && (
+                          <p className="text-sm text-red-500 mt-1">{(errors.variants as any)[index].price.message}</p>
                         )}
                       </div>
                       <Button
@@ -436,7 +437,7 @@ export default function MenuItems() {
                         onClick={() => removeVariant(index)}
                         className="text-red-500 hover:text-red-600 hover:bg-red-50"
                       >
-                        <Trash className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   ))}
@@ -478,7 +479,7 @@ export default function MenuItems() {
                       ) : (
                         <>
                           <div className="h-10 w-10 rounded-full bg-orange-100 flex items-center justify-center mb-2 text-orange-600">
-                            <Image className="h-5 w-5" />
+                            <ImageIcon className="h-5 w-5" />
                           </div>
                           <span className="text-sm font-medium text-slate-700">Click to upload image</span>
                           <span className="text-xs text-slate-400 mt-1">JPG, PNG, WEBP up to 5MB</span>
