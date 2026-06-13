@@ -6,3 +6,4 @@ export const getPublicMenu = (restaurantId: string) =>
 
 export const getTableContext = (tableId: string) =>
   api.get<ApiResponse<{ tableId: string; restaurantId: string; tableNumber: string; restaurantName?: string }>>(`/tables/${tableId}/menu`)
+
