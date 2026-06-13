@@ -6,8 +6,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 // Format price as LKR
-export const formatPrice = (amount: number): string =>
-  `LKR ${amount.toFixed(2)}`
+export const formatPrice = (amount?: number): string => {
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    return "LKR 0.00"
+  }
+  return `LKR ${Number(amount).toFixed(2)}`
+}
 
 // Format date/time
 export const formatDate = (dateStr: string): string =>

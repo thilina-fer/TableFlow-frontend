@@ -1,13 +1,36 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { CheckCircle2, Clock, CheckCircle, Package, CreditCard, XCircle, ChevronLeft } from "lucide-react"
+import { toast } from "sonner"
 
-import { getOrderById } from "@/api/order.api"
+import { getOrderById, downloadPublicBill } from "@/api/order.api"
 import { useSocket } from "@/hooks/useSocket"
 import type { Order } from "@/types"
 import { formatDateTime, formatPrice } from "@/lib/utils"
 import { theme } from "@/lib/theme"
 import { Button } from "@/components/ui/button"
+
+const OrderTimer = ({ createdAt, status }: { createdAt: string, status: string }) => {
+  const [elapsed, setElapsed] = useState("")
+
+  useEffect(() => {
+    if (status === "delivered" || status === "rejected") return
+    
+    const interval = setInterval(() => {
+      const diff = Math.floor((Date.now() - new Date(createdAt).getTime()) / 1000)
+      if (diff < 0) return
+      const m = Math.floor(diff / 60)
+      const s = diff % 60
+      setElapsed(`${m}:${s.toString().padStart(2, '0')}`)
+    }, 1000)
+    
+    return () => clearInterval(interval)
+  }, [createdAt, status])
+
+  if (status === "delivered" || status === "rejected") return <span>Done</span>
+
+  return <span>{elapsed || "0:00"}</span>
+}
 
 export default function OrderTracking() {
   const { id } = useParams()
@@ -15,6 +38,7 @@ export default function OrderTracking() {
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState(false)
   
   const { socket } = useSocket() // no token for public socket
 
@@ -85,6 +109,25 @@ export default function OrderTracking() {
 
   const showPaymentCTA = order.paymentMethod === "card" && order.paymentStatus === "pending" && order.status === "delivered"
 
+  const handleDownloadBill = async () => {
+    setDownloading(true)
+    try {
+      const res = await downloadPublicBill(order._id)
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement("a")
+      link.href = url
+      link.setAttribute("download", `receipt-${order._id.slice(-6).toUpperCase()}.pdf`)
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+    } catch (err: any) {
+      console.error(err)
+      toast.error(err.message || "Failed to download bill. It may not be generated yet.")
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 py-8 px-4">
       <div className="max-w-lg mx-auto space-y-6">
@@ -113,35 +156,57 @@ export default function OrderTracking() {
             </Button>
           </div>
         ) : (
-          <div className={`${theme.card} p-8 relative`}>
-            <div className="absolute top-0 bottom-0 left-[43px] w-0.5 bg-slate-100" />
-            <div className="space-y-8 relative">
+          <div className={`${theme.card} p-6 sm:p-8 relative`}>
+            {/* Header & Timer */}
+            <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+               <h3 className="font-bold text-slate-800">Live Status</h3>
+               <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-brand bg-orange-50 px-3 py-1.5 rounded-full border border-orange-100">
+                  <Clock size={16} className={order.status !== "delivered" ? "animate-spin-slow" : ""} />
+                  <OrderTimer createdAt={order.createdAt.toString()} status={order.status} />
+               </div>
+            </div>
+
+            {/* Horizontal Steps (Uber Eats Style) */}
+            <div className="flex justify-between items-center relative w-full pt-4 pb-2 px-2">
+              {/* background connecting line */}
+              <div className="absolute top-1/2 -translate-y-1/2 left-[10%] right-[10%] h-1 bg-slate-200 -z-10 rounded-full" />
+              {/* active connecting line */}
+              <div 
+                className="absolute top-1/2 -translate-y-1/2 left-[10%] h-1 bg-brand transition-all duration-1000 -z-10 rounded-full" 
+                style={{ width: `${Math.max(0, (currentStep - 1) / (steps.length - 1) * 80)}%` }} 
+              />
+              
               {steps.map((step, index) => {
                 const stepNum = index + 1
                 const isActive = stepNum === currentStep
                 const isCompleted = stepNum < currentStep || (stepNum === 5 && isPaid)
-                const isPending = stepNum > currentStep
 
                 return (
-                  <div key={index} className="flex items-center gap-5">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 shadow-sm z-10 transition-colors duration-500 ${
-                      isCompleted ? "bg-emerald-500 text-white" :
-                      isActive ? "bg-brand text-white ring-4 ring-orange-100" :
-                      "bg-slate-100 text-slate-400 border-2 border-slate-200"
+                  <div key={index} className="flex flex-col items-center relative">
+                    <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-500 z-10 ${
+                      isCompleted ? "bg-emerald-500 text-white shadow-md scale-100 sm:scale-105" :
+                      isActive ? "bg-brand text-white shadow-lg ring-4 ring-orange-100 scale-110 sm:scale-110" :
+                      "bg-slate-100 text-slate-300 border-2 border-white"
                     }`}>
-                      {step.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className={`font-bold text-lg ${
-                        isCompleted ? "text-slate-900" :
-                        isActive ? "text-brand" :
-                        "text-slate-400"
-                      }`}>{step.label}</h3>
-                      {isActive && <p className="text-sm text-slate-500 font-medium animate-pulse">In progress...</p>}
+                      <div className="scale-75 sm:scale-100">{step.icon}</div>
                     </div>
                   </div>
                 )
               })}
+            </div>
+            
+            {/* Current Step Description */}
+            <div className="text-center mt-6 mb-2">
+               <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                 {isPaid ? "Payment Successful" : steps[currentStep - 1]?.label || "Order Completed"}
+               </h3>
+               <p className="text-sm text-slate-500 font-medium mt-1">
+                 {currentStep === 1 && "Waiting for kitchen to accept..."}
+                 {currentStep === 2 && "Your food is being cooked with care."}
+                 {currentStep === 3 && "Waiting for waiter to pick up."}
+                 {currentStep === 4 && (!isPaid ? "Enjoy your meal!" : "Thank you for dining with us!")}
+                 {currentStep === 5 && "Thank you for visiting!"}
+               </p>
             </div>
           </div>
         )}
@@ -172,7 +237,7 @@ export default function OrderTracking() {
                     {item.variantName && <p className="text-xs text-slate-500">{item.variantName}</p>}
                   </div>
                 </div>
-                <span className="font-medium text-slate-700">{formatPrice(item.subtotal)}</span>
+                <span className="font-medium text-slate-700 shrink-0 ml-3">{formatPrice(item.subtotal)}</span>
               </div>
             ))}
           </div>
@@ -184,11 +249,11 @@ export default function OrderTracking() {
             </div>
             <div className="flex justify-between">
               <span>Tax</span>
-              <span>{formatPrice(order.taxAmount)}</span>
+              <span className="shrink-0">{formatPrice(order.taxAmount)}</span>
             </div>
             <div className="flex justify-between text-lg font-bold text-slate-900 pt-2 border-t border-slate-100">
               <span>Total</span>
-              <span>{formatPrice(order.totalAmount)}</span>
+              <span className="shrink-0">{formatPrice(order.totalAmount)}</span>
             </div>
           </div>
 
@@ -202,6 +267,16 @@ export default function OrderTracking() {
              <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-lg text-sm italic font-medium">
                "{order.specialNote}"
              </div>
+          )}
+
+          {isPaid && (
+            <Button 
+              onClick={handleDownloadBill} 
+              disabled={downloading}
+              className="w-full mt-6 bg-slate-900 text-white hover:bg-slate-800 rounded-xl h-12 shadow-md"
+            >
+              {downloading ? "Downloading..." : "Download Bill (PDF)"}
+            </Button>
           )}
         </div>
 

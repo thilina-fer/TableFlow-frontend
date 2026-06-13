@@ -13,6 +13,9 @@ export const placeOrder = (data: {
 export const getOrderById = (id: string) =>
   api.get<ApiResponse<Order>>(`/orders/${id}`)
 
+export const downloadPublicBill = (id: string) =>
+  api.get(`/orders/${id}/bill`, { responseType: "blob" })
+
 // Kitchen
 export const getKitchenOrders = () =>
   api.get<ApiResponse<Order[]>>("/kitchen")

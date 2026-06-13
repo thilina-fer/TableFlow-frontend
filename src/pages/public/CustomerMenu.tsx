@@ -163,7 +163,13 @@ export default function CustomerMenu() {
       const res = await placeOrder(orderData as any)
       if (res.data.success) {
         dispatch(clearCart())
-        navigate(`/order/${res.data.data.order._id}/track`)
+        const orderId = res.data.data._id || res.data.data.order?._id
+        
+        if (paymentMethod === "card") {
+          navigate(`/order/${orderId}/pay`)
+        } else {
+          navigate(`/order/${orderId}/track`)
+        }
       }
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.message || "Failed to place order")
