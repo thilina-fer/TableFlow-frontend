@@ -46,7 +46,7 @@ export const StaffLayout: React.FC<{ children?: React.ReactNode }> = ({ children
       .slice(0, 2)
   }
 
-  let navLinks = []
+  let navLinks: any[] = []
   if (user?.role === "waiter") {
     navLinks = [
       { to: "/waiter", label: "Waiter Dashboard", icon: <LayoutDashboard className="h-5 w-5" />, end: true },
