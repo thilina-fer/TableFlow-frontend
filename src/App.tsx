@@ -37,16 +37,15 @@ import Waiter from "@/pages/staff/Waiter"
 import WaiterHistory from "@/pages/staff/WaiterHistory"
 import Cashier from "@/pages/staff/Cashier"
 
+import AdminAnalytics from "@/pages/admin/Analytics"
+import SuperAdminAnalytics from "@/pages/superadmin/SuperAdminAnalytics"
+import Restaurants from "@/pages/superadmin/Restaurants"
+import RestaurantDetail from "@/pages/superadmin/RestaurantDetail"
+import AuditLog from "@/pages/superadmin/AuditLog"
+
 // Placeholder components
 const NotFound = () => <div className="p-8 text-center text-xl">404 - Not Found</div>
-
-const AdminAnalytics = () => <div className="text-xl">Admin Analytics</div>
 const WaiterDetailsPlaceholder = () => <div className="p-8 text-center text-slate-500 mt-10">Order Details feature coming soon</div>
-
-const SuperAdminDashboard = () => <div className="text-xl">Super Admin Dashboard</div>
-const Restaurants = () => <div className="text-xl">Restaurants</div>
-const SuperAdminAnalytics = () => <div className="text-xl">Super Admin Analytics</div>
-const AuditLog = () => <div className="text-xl">Audit Log</div>
 
 const AnimatedRoutes = () => {
   const location = useLocation()
@@ -179,9 +178,10 @@ const AnimatedRoutes = () => {
             </SuperAdminRoute>
           }
         >
-          <Route index element={<SuperAdminDashboard />} />
+          <Route index element={<Navigate to="/superadmin/analytics" replace />} />
           <Route path="registrations" element={<Registrations />} />
           <Route path="registrations/:id" element={<RegistrationDetail />} />
+          <Route path="restaurants/:id" element={<RestaurantDetail />} />
           <Route path="restaurants" element={<Restaurants />} />
           <Route path="analytics" element={<SuperAdminAnalytics />} />
           <Route path="audit-log" element={<AuditLog />} />
