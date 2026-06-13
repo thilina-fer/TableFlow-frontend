@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Loader2, Plus, Minus, X, ShoppingCart } from "lucide-react"
+import { Loader2, Plus, Minus, X, ShoppingCart, Sparkles } from "lucide-react"
 
 import { getPublicMenu, getTableContext } from "@/api/menu.api"
 import { placeOrder } from "@/api/order.api"
@@ -16,15 +16,14 @@ import {
   selectCartItems,
   selectCartTotal,
   selectCartCount,
-  selectTableContext,
   selectPaymentMethod
 } from "@/features/cart/cartSlice"
-import type { MenuItem, OrderItem } from "@/types"
+import type { MenuItem } from "@/types"
 import { theme } from "@/lib/theme"
 import { formatPrice } from "@/lib/utils"
 
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/shared"
 
@@ -36,7 +35,7 @@ export default function CustomerMenu() {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
 
-  const { restaurantId: tableRestId } = useAppSelector(selectTableContext)
+  // const { restaurantId: tableRestId } = useAppSelector(selectTableContext)
   const paymentMethod = useAppSelector(selectPaymentMethod)
   const cartItems = useAppSelector(selectCartItems)
   const cartTotal = useAppSelector(selectCartTotal)
@@ -107,6 +106,8 @@ export default function CustomerMenu() {
     return Array.from(tags)
   }, [menuItems])
 
+
+
   const toggleTag = (tag: string) => {
     setSelectedTags(prev => 
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -163,7 +164,7 @@ export default function CustomerMenu() {
       const res = await placeOrder(orderData as any)
       if (res.data.success) {
         dispatch(clearCart())
-        const orderId = res.data.data._id || res.data.data.order?._id
+        const orderId = (res.data.data as any)._id || (res.data.data as any).order?._id
         
         if (paymentMethod === "card") {
           navigate(`/order/${orderId}/pay`)
@@ -259,6 +260,8 @@ export default function CustomerMenu() {
             <span>{formatPrice(cartTotal * 1.1)}</span>
           </div>
         </div>
+
+
 
         <div className="space-y-2">
           <p className="text-sm font-semibold text-slate-900">Payment Method</p>
