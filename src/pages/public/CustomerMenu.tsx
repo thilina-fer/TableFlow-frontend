@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react"
 import { useSearchParams, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { Loader2, Plus, Minus, X, ShoppingCart, Sparkles } from "lucide-react"
+import { Loader2, Plus, Minus, X, ShoppingCart } from "lucide-react"
 
 import { getPublicMenu, getTableContext } from "@/api/menu.api"
 import { placeOrder } from "@/api/order.api"

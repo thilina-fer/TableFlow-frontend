@@ -8,6 +8,7 @@ import { SuperAdminService } from "@/services/superadmin.service"
 import { Shield, Loader2, RefreshCw } from "lucide-react"
 import { toast } from "sonner"
 import type { AuditLog as AuditLogType } from "@/types"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function AuditLog() {
   const [logs, setLogs] = useState<AuditLogType[]>([])
@@ -24,7 +25,7 @@ export default function AuditLog() {
     setLoading(true)
     try {
       const res = await SuperAdminService.getAuditLogs({
-        action: actionFilter || undefined,
+        action: actionFilter === "all" ? undefined : (actionFilter || undefined),
         startDate: startDate || undefined,
         endDate: endDate || undefined,
         page
@@ -105,19 +106,20 @@ export default function AuditLog() {
           </div>
           
           <div className="flex flex-wrap items-center gap-3">
-            <select
-              value={actionFilter}
-              onChange={(e) => setActionFilter(e.target.value)}
-              className="h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 min-w-[150px]"
-            >
-              <option value="">All Actions</option>
-              <option value="APPROVED">Approved</option>
-              <option value="REJECTED">Rejected</option>
-              <option value="SUSPENDED">Suspended</option>
-              <option value="REACTIVATED">Reactivated</option>
-              <option value="DELETED">Deleted</option>
-              <option value="PASSWORD_RESET">Password Reset</option>
-            </select>
+            <Select value={actionFilter} onValueChange={setActionFilter}>
+              <SelectTrigger className="w-[150px] bg-white h-10 border-slate-200">
+                <SelectValue placeholder="All Actions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Actions</SelectItem>
+                <SelectItem value="APPROVED">Approved</SelectItem>
+                <SelectItem value="REJECTED">Rejected</SelectItem>
+                <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                <SelectItem value="REACTIVATED">Reactivated</SelectItem>
+                <SelectItem value="DELETED">Deleted</SelectItem>
+                <SelectItem value="PASSWORD_RESET">Password Reset</SelectItem>
+              </SelectContent>
+            </Select>
 
             <div className="flex items-center gap-2">
               <input 

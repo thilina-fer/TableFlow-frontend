@@ -10,9 +10,10 @@ import { SuperAdminService } from "@/services/superadmin.service"
 import type { Restaurant } from "@/types"
 import { MoreVertical, Eye, Key, Ban, CheckCircle2, Trash2, Loader2, Store } from "lucide-react"
 import { toast } from "sonner"
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Need Suspend dialog which takes a reason
 // import { suspendRegistration } from "@/api/superadmin.api"
@@ -120,58 +121,38 @@ export default function Restaurants() {
       accessor: "_id" as keyof Restaurant,
       render: (id: string, row: Restaurant) => (
         <div onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
                 <MoreVertical size={16} className="text-slate-500" />
               </button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Portal>
-              <DropdownMenu.Content 
-                className="min-w-[160px] bg-white rounded-xl shadow-xl border border-slate-100 p-1 z-50 animate-in fade-in zoom-in-95"
-                align="end"
-              >
-                <DropdownMenu.Item 
-                  className="flex items-center px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer outline-none"
-                  onClick={() => navigate(`/superadmin/restaurants/${id}`)}
-                >
-                  <Eye size={16} className="mr-2" /> View Details
-                </DropdownMenu.Item>
-                <DropdownMenu.Item 
-                  className="flex items-center px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer outline-none"
-                  onClick={() => setResetId(id)}
-                >
-                  <Key size={16} className="mr-2" /> Reset Password
-                </DropdownMenu.Item>
-                <DropdownMenu.Separator className="h-px bg-slate-100 my-1" />
-                
-                {row.status === "approved" && (
-                  <DropdownMenu.Item 
-                    className="flex items-center px-3 py-2 text-sm text-amber-600 hover:bg-amber-50 rounded-lg cursor-pointer outline-none"
-                    onClick={() => setSuspendId(id)}
-                  >
-                    <Ban size={16} className="mr-2" /> Suspend
-                  </DropdownMenu.Item>
-                )}
-                
-                {row.status === "suspended" && (
-                  <DropdownMenu.Item 
-                    className="flex items-center px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-lg cursor-pointer outline-none"
-                    onClick={() => setReactivateId(id)}
-                  >
-                    <CheckCircle2 size={16} className="mr-2" /> Reactivate
-                  </DropdownMenu.Item>
-                )}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="min-w-[160px]">
+              <DropdownMenuItem onClick={() => navigate(`/superadmin/restaurants/${id}`)}>
+                <Eye size={16} className="mr-2" /> View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setResetId(id)}>
+                <Key size={16} className="mr-2" /> Reset Password
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              
+              {row.status === "approved" && (
+                <DropdownMenuItem className="text-amber-600 focus:text-amber-600 focus:bg-amber-50" onClick={() => setSuspendId(id)}>
+                  <Ban size={16} className="mr-2" /> Suspend
+                </DropdownMenuItem>
+              )}
+              
+              {row.status === "suspended" && (
+                <DropdownMenuItem className="text-blue-600 focus:text-blue-600 focus:bg-blue-50" onClick={() => setReactivateId(id)}>
+                  <CheckCircle2 size={16} className="mr-2" /> Reactivate
+                </DropdownMenuItem>
+              )}
 
-                <DropdownMenu.Item 
-                  className="flex items-center px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg cursor-pointer outline-none"
-                  onClick={() => setDeleteId(id)}
-                >
-                  <Trash2 size={16} className="mr-2" /> Delete
-                </DropdownMenu.Item>
-              </DropdownMenu.Content>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+              <DropdownMenuItem className="text-red-600 focus:text-red-600 focus:bg-red-50" onClick={() => setDeleteId(id)}>
+                <Trash2 size={16} className="mr-2" /> Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       )
     }
@@ -193,15 +174,16 @@ export default function Restaurants() {
             <h3 className="text-lg font-bold text-slate-900">Restaurant Directory</h3>
           </div>
           
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 px-3 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 min-w-[150px]"
-          >
-            <option value="all">All Statuses</option>
-            <option value="approved">Approved</option>
-            <option value="suspended">Suspended</option>
-          </select>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[150px] bg-white h-10 border-slate-200">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="suspended">Suspended</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {loading ? (
