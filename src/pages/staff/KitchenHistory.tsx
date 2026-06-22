@@ -4,7 +4,7 @@ import { Clock, Loader2, History as HistoryIcon } from "lucide-react"
 
 import { getKitchenHistory } from "@/api/order.api"
 import type { Order } from "@/types"
-import { timeAgo } from "@/lib/utils"
+import { timeAgo, formatPrice } from "@/lib/utils"
 
 export default function KitchenHistory() {
   const [historyOrders, setHistoryOrders] = useState<Order[]>([])
@@ -77,8 +77,14 @@ export default function KitchenHistory() {
                   
                   <div className="text-sm text-slate-600 space-y-1 mb-4 flex-1">
                     {order.items.slice(0, 4).map((item, idx) => (
-                      <div key={idx} className="flex justify-between">
-                        <span><span className="font-medium text-slate-400 mr-2">{item.quantity}x</span>{item.name}</span>
+                      <div key={idx} className="flex justify-between items-start">
+                        <span className="flex-1 pr-2">
+                          <span className="font-medium text-slate-400 mr-2">{item.quantity}x</span>
+                          {item.name}
+                        </span>
+                        <span className="font-medium text-slate-700 shrink-0">
+                          {formatPrice(item.subtotal || (item.price * item.quantity))}
+                        </span>
                       </div>
                     ))}
                     {order.items.length > 4 && (

@@ -136,13 +136,26 @@ export default function Cashier() {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div className="flex flex-col justify-between gap-4 mb-4">
                   
-                  <div className="text-sm text-slate-600 font-medium">
-                    {order.items.length} items ordered
+                  <div className="text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <h4 className="font-semibold text-slate-800 mb-3 border-b border-slate-200 pb-2">Order Items</h4>
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="flex justify-between items-start">
+                          <span className="flex-1 pr-2">
+                            <span className="font-medium text-slate-400 mr-2">{item.quantity}x</span>
+                            {item.name}
+                          </span>
+                          <span className="font-medium text-slate-700 shrink-0">
+                            {formatPrice(item.subtotal || (item.price * item.quantity))}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <div className="flex justify-end items-center gap-3 w-full">
                     <Button 
                       variant="outline" 
                       onClick={() => handleDownloadBill(order._id)}

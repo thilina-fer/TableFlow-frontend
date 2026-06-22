@@ -270,7 +270,7 @@ export default function CardPayment() {
                     <span className="font-medium text-slate-500">{item.quantity}x</span>
                     <span className="text-slate-700 font-medium">{item.name}</span>
                   </div>
-                  <span className="text-slate-700 shrink-0 ml-3">{formatPrice(item.subtotal)}</span>
+                  <span className="text-slate-700 shrink-0 ml-3">{formatPrice(item.subtotal || (item.price * item.quantity))}</span>
                 </div>
               ))}
             </div>

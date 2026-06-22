@@ -237,7 +237,7 @@ export default function OrderTracking() {
                     {item.variantName && <p className="text-xs text-slate-500">{item.variantName}</p>}
                   </div>
                 </div>
-                <span className="font-medium text-slate-700 shrink-0 ml-3">{formatPrice(item.subtotal)}</span>
+                <span className="font-medium text-slate-700 shrink-0 ml-3">{formatPrice(item.subtotal || (item.price * item.quantity))}</span>
               </div>
             ))}
           </div>
