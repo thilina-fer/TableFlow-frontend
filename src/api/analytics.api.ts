@@ -16,7 +16,7 @@ export const getOnboardingStatus = () =>
     hasTable: boolean
     hasStaff: boolean
     isComplete: boolean
-  }>>("/admin/analytics/onboarding/status")
+  }>>("/admin/onboarding/status")
 
 // Admin analytics
 export const getRevenueData = (period: "daily" | "weekly" | "monthly") =>
@@ -42,3 +42,27 @@ export const getRegistrationGrowth = () =>
 
 export const getOrdersPerRestaurant = () =>
   api.get<ApiResponse<{ restaurantName: string; orders: number; revenue: number }[]>>("/superadmin/analytics/orders")
+
+export const getFeedbackAnalytics = () =>
+  api.get<ApiResponse<{
+    summary: {
+      totalReviews: number
+      averageRating: number
+      ratingBreakdown: Record<number, number>
+      sentimentBreakdown: { positive: number; negative: number; neutral: number }
+      categoryBreakdown: Record<string, number>
+    }
+    suggestions: string[]
+    reviews: Array<{
+      _id: string
+      rating: number
+      comment?: string
+      aiAnalysis?: {
+        sentiment: "positive" | "negative" | "neutral"
+        category: string
+        summary: string
+      }
+      createdAt: string
+    }>
+  }>>("/admin/ai/feedback-analytics")
+
