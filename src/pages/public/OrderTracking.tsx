@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { CheckCircle2, Clock, CheckCircle, Package, CreditCard, XCircle, ChevronLeft } from "lucide-react"
+import { CheckCircle2, Clock, CheckCircle, Package, CreditCard, XCircle, ChevronLeft, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
 import { getOrderById, downloadPublicBill } from "@/api/order.api"
+import { submitFeedback } from "@/api/feedback.api"
 import { useSocket } from "@/hooks/useSocket"
 import type { Order } from "@/types"
 import { formatDateTime, formatPrice } from "@/lib/utils"
@@ -41,6 +42,36 @@ export default function OrderTracking() {
   const [downloading, setDownloading] = useState(false)
   
   const { socket } = useSocket() // no token for public socket
+ 
+  const [rating, setRating] = useState(0)
+  const [hoveredRating, setHoveredRating] = useState(0)
+  const [comment, setComment] = useState("")
+  const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+ 
+  const handleSubmitReview = async () => {
+    if (rating === 0 || !order) return
+    setIsSubmitting(true)
+    try {
+      const restaurantId = typeof order.restaurantId === "string" 
+        ? order.restaurantId 
+        : (order.restaurantId as any)._id || order.restaurantId
+      
+      await submitFeedback({
+        restaurantId,
+        orderId: order._id,
+        rating,
+        comment: comment.trim() || undefined
+      })
+      setSubmitted(true)
+      toast.success("Thank you for your feedback!")
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to submit feedback.")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
 
   useEffect(() => {
     if (!id) return
@@ -208,6 +239,56 @@ export default function OrderTracking() {
                  {currentStep === 5 && "Thank you for visiting!"}
                </p>
             </div>
+          </div>
+        )}
+
+        {/* Feedback Card */}
+        {(order.status === "delivered" && !submitted) && (
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center transition-all">
+            <h3 className="font-bold text-slate-800 text-lg mb-1">How was your dining experience?</h3>
+            <p className="text-slate-500 text-sm mb-4">Leave a quick rating and comment to help us improve.</p>
+            
+            {/* Star Selector */}
+            <div className="flex justify-center gap-2 mb-4">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button 
+                  key={star} 
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  className={`text-3xl transition-transform hover:scale-125 duration-150 ${
+                    (hoveredRating || rating) >= star ? 'text-amber-400' : 'text-slate-200'
+                  }`}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+ 
+            <textarea
+              placeholder="Any additional thoughts? (Optional)"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 mb-4 h-20 resize-none transition-shadow"
+            />
+ 
+            <Button 
+              onClick={handleSubmitReview} 
+              disabled={rating === 0 || isSubmitting}
+              className="w-full bg-slate-900 text-white hover:bg-slate-800 rounded-xl h-11 shadow-sm font-semibold flex items-center justify-center gap-2"
+            >
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Submit Feedback
+            </Button>
+          </div>
+        )}
+ 
+        {submitted && (
+          <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl text-center shadow-sm">
+            <CheckCircle2 className="mx-auto text-emerald-500 h-12 w-12 mb-3 animate-bounce" />
+            <h3 className="font-bold text-emerald-900 text-lg mb-1">Thank you for your feedback!</h3>
+            <p className="text-emerald-700 text-sm">Your review has been submitted successfully to help us improve our service.</p>
           </div>
         )}
 
