@@ -177,6 +177,18 @@ const AnimatedRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/cashier/history"
+          element={
+            <ProtectedRoute roles={["cashier"]}>
+              <FirstLoginGuard>
+                <StaffLayout>
+                  <Cashier />
+                </StaffLayout>
+              </FirstLoginGuard>
+            </ProtectedRoute>
+          }
+        />
 
         {/* Super Admin Routes */}
         <Route

@@ -59,7 +59,10 @@ export const StaffLayout: React.FC<{ children?: React.ReactNode }> = ({ children
       { to: "/kitchen/history", label: "Order History", icon: <HistoryIcon className="h-5 w-5" />, end: true }
     ]
   } else if (user?.role === "cashier") {
-    navLinks = [{ to: "/cashier", label: "Cashier Dashboard", icon: <Banknote className="h-5 w-5" />, end: true }]
+    navLinks = [
+      { to: "/cashier", label: "Cashier Dashboard", icon: <Banknote className="h-5 w-5" />, end: true },
+      { to: "/cashier/history", label: "Order History", icon: <HistoryIcon className="h-5 w-5" />, end: true }
+    ]
   }
 
   return (

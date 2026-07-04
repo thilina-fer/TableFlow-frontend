@@ -16,11 +16,18 @@ export default function Dashboard() {
   const navigate = useNavigate()
   const user = useAppSelector(selectCurrentUser)
   
-  const [summary, setSummary] = useState({
+  const [summary, setSummary] = useState<{
+    totalOrdersToday: number
+    revenueToday: number
+    activeTables: number
+    pendingOrders: number
+    recentOrders: any[]
+  }>({
     totalOrdersToday: 0,
     revenueToday: 0,
     activeTables: 0,
-    pendingOrders: 0
+    pendingOrders: 0,
+    recentOrders: []
   })
   const [onboarding, setOnboarding] = useState<OnboardingStatus | null>(null)
   const [loading, setLoading] = useState(true)
@@ -148,6 +155,64 @@ export default function Dashboard() {
           </div>
 
         </div>
+      </div>
+      {/* Recent Orders Summary */}
+      <div className="pt-4">
+        <h3 className="font-bold text-slate-900 mb-4 text-lg">Recent Orders</h3>
+        {summary.recentOrders && summary.recentOrders.length > 0 ? (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 text-slate-500 font-bold text-xs uppercase border-b border-slate-100">
+                    <th className="py-4 px-6">Order ID</th>
+                    <th className="py-4 px-6">Table</th>
+                    <th className="py-4 px-6">Method</th>
+                    <th className="py-4 px-6">Status</th>
+                    <th className="py-4 px-6">Payment</th>
+                    <th className="py-4 px-6 text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+                  {summary.recentOrders.map((order: any) => (
+                    <tr key={order._id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="py-4 px-6 font-semibold">#{order._id.slice(-6).toUpperCase()}</td>
+                      <td className="py-4 px-6 font-medium">
+                        Table {typeof order.tableId === 'string' ? order.tableId.slice(-4) : order.tableId?.tableNumber || 'N/A'}
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${order.paymentMethod === 'cash' ? 'bg-emerald-50 text-emerald-700' : 'bg-blue-50 text-blue-700'}`}>
+                          {order.paymentMethod === 'cash' ? 'Cash' : 'Card'}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                          order.status === 'completed' ? 'bg-green-50 text-green-700 border border-green-200' :
+                          order.status === 'delivered' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                          order.status === 'preparing' ? 'bg-amber-50 text-amber-700 border border-amber-200 animate-pulse' :
+                          order.status === 'placed' ? 'bg-purple-50 text-purple-700 border border-purple-200' :
+                          'bg-red-50 text-red-700 border border-red-200'
+                        }`}>
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${order.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-700'}`}>
+                          {order.paymentStatus === 'paid' ? 'Paid' : 'Pending'}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-right font-bold text-slate-900">{formatPrice(order.totalAmount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center text-slate-500 shadow-sm">
+            No orders found.
+          </div>
+        )}
       </div>
       
     </div>
