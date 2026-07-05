@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { Clock, Check, X, Loader2 } from "lucide-react"
+import { Clock, Check, X, Loader2, AlertCircle } from "lucide-react"
+
 
 import { getKitchenOrders, approveOrder, rejectOrder, completeOrder } from "@/api/order.api"
 import { useSocket } from "@/hooks/useSocket"
@@ -106,74 +107,107 @@ export default function Kitchen() {
 
   const OrderCard = ({ order, type }: { order: Order, type: "placed" | "preparing" }) => {
     const isProcessing = processingId === order._id
-    
+    const tableNumStr = typeof order.tableId === 'string' ? order.tableId.slice(-4) : order.tableId.tableNumber
+    const tableLabel = tableNumStr.toLowerCase().startsWith("table") ? tableNumStr : `Table ${tableNumStr}`
+
     return (
-      <div className={`${theme.card} p-4 border-l-4 ${type === "placed" ? "border-l-blue-500" : "border-l-orange-500"} flex flex-col h-full bg-white`}>
-        <div className="flex justify-between items-start mb-3 border-b border-slate-100 pb-2">
-          <h3 className="font-bold text-lg text-slate-800">
-            Table {typeof order.tableId === 'string' ? order.tableId.slice(-4) : order.tableId.tableNumber}
+      <div className={`bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full relative overflow-hidden group`}>
+        {/* Top color indicator bar */}
+        <div className={`absolute top-0 left-0 right-0 h-1.5 ${type === "placed" ? "bg-blue-500" : "bg-orange-500"}`} />
+
+        <div className="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+          <h3 className="font-bold text-slate-800 text-base tracking-tight">
+            {tableLabel}
           </h3>
-          <div className="flex items-center gap-1 text-slate-500 text-sm font-medium">
-            <Clock size={14} />
+          <div className="flex items-center gap-1.5 bg-slate-50 text-slate-500 text-xs font-semibold px-2.5 py-1 rounded-md border border-slate-100">
+            <Clock size={12} className="text-slate-400" />
             {timeAgo(order.createdAt)}
           </div>
         </div>
 
-        <div className="space-y-1 mb-4 flex-1">
+        {/* Items List */}
+        <div className="space-y-2.5 mb-4 flex-1">
           {order.items.map((item, idx) => (
-            <div key={idx} className="flex justify-between items-start text-sm">
-              <span className="font-medium text-slate-700">
-                <span className="text-slate-400 mr-2">{item.quantity}x</span>
-                {item.name} {item.variantName && <span className="text-slate-400 text-xs">({item.variantName})</span>}
+            <div key={idx} className="flex justify-between items-start text-sm bg-slate-50/50 p-2 rounded-lg border border-slate-100/50">
+              <span className="font-medium text-slate-700 flex items-start">
+                <span className={`inline-flex items-center justify-center font-extrabold px-2 py-0.5 rounded text-xs mr-2 shrink-0 ${
+                  type === "placed" ? "bg-blue-50 text-blue-700" : "bg-orange-50 text-orange-700"
+                }`}>
+                  {item.quantity}x
+                </span>
+                <span className="leading-tight pt-0.5">
+                  {item.name}
+                  {item.variantName && (
+                    <span className="block text-slate-400 text-xs font-normal mt-0.5">
+                      ({item.variantName})
+                    </span>
+                  )}
+                </span>
               </span>
             </div>
           ))}
         </div>
 
+        {/* Special Note */}
         {order.specialNote && (
-          <div className="bg-amber-50 text-amber-800 p-2 rounded text-xs font-medium italic mb-4">
-            Note: {order.specialNote}
+          <div className="bg-amber-50/70 text-amber-800 border border-amber-100/70 p-3 rounded-xl text-xs font-medium mb-4 flex gap-2 items-start shadow-sm">
+            <AlertCircle size={14} className="text-amber-600 shrink-0 mt-0.5" />
+            <span className="leading-snug italic">"{order.specialNote}"</span>
           </div>
         )}
 
-        <div className="flex justify-between items-center mb-4 text-sm font-bold text-slate-900">
-          <span>Total</span>
-          <span>{formatPrice(order.totalAmount)}</span>
+        {/* Total Price Section */}
+        <div className="flex justify-between items-center mb-4 pt-2 border-t border-slate-100 text-sm font-bold text-slate-800">
+          <span className="text-slate-500 font-medium">Total Amount</span>
+          <span className="text-slate-900">{formatPrice(order.totalAmount)}</span>
         </div>
 
-        <div className="flex gap-2 mt-auto">
+        {/* Action Buttons */}
+        <div className="flex gap-2.5 mt-auto">
           {type === "placed" ? (
             <>
               <Button 
-                variant="outline" 
-                className="flex-1 bg-white hover:bg-green-50 border-green-200 text-green-700 font-semibold"
+                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow-sm h-10 border-none text-xs transition-colors"
                 onClick={() => handleApprove(order._id)}
                 disabled={isProcessing}
               >
-                {isProcessing ? <Loader2 className="animate-spin h-4 w-4" /> : <><Check size={16} className="mr-1" /> Approve</>}
+                {isProcessing ? (
+                  <Loader2 className="animate-spin h-4 w-4" />
+                ) : (
+                  <>
+                    <Check size={14} className="mr-1" /> Approve
+                  </>
+                )}
               </Button>
               <Button 
-                variant="outline" 
-                className="flex-1 bg-white hover:bg-red-50 border-red-200 text-red-700 font-semibold"
+                variant="outline"
+                className="flex-1 bg-rose-50 hover:bg-rose-100 border-none text-rose-700 font-bold rounded-xl h-10 text-xs transition-colors"
                 onClick={() => setRejectTarget(order._id)}
                 disabled={isProcessing}
               >
-                <X size={16} className="mr-1" /> Reject
+                <X size={14} className="mr-1" /> Reject
               </Button>
             </>
           ) : (
             <Button 
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-sm h-10 border-none text-xs transition-colors"
               onClick={() => handleComplete(order._id)}
               disabled={isProcessing}
             >
-              {isProcessing ? <Loader2 className="animate-spin h-4 w-4" /> : <><Check size={16} className="mr-1" /> Mark Complete</>}
+              {isProcessing ? (
+                <Loader2 className="animate-spin h-4 w-4" />
+              ) : (
+                <>
+                  <Check size={14} className="mr-1" /> Mark Complete
+                </>
+              )}
             </Button>
           )}
         </div>
       </div>
     )
   }
+
 
   return (
     <div className="flex flex-col h-full max-w-7xl mx-auto w-full">

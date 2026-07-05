@@ -12,13 +12,15 @@ import {
   Clock,
 } from "lucide-react"
 import { useAppDispatch, useAppSelector } from "@/app/hooks"
-import { clearCredentials, selectCurrentUser } from "@/features/auth/authSlice"
+import { clearCredentials, selectCurrentUser, setCredentials } from "@/features/auth/authSlice"
+import { AuthService } from "@/services/auth.service"
 import { theme } from "@/lib/theme"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { AnimatePresence } from "framer-motion"
 import { PageTransition } from "@/components/layout/PageTransition"
 import logoImage from "@/assets/logo.png"
+
 
 export const AdminLayout: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -32,6 +34,23 @@ export const AdminLayout: React.FC = () => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(timer)
   }, [])
+
+  React.useEffect(() => {
+    if (user && !user.restaurantName) {
+      AuthService.getMe()
+        .then((updatedUser) => {
+          dispatch(
+            setCredentials({
+              user: updatedUser,
+              accessToken: localStorage.getItem("accessToken") || "",
+              refreshToken: localStorage.getItem("refreshToken") || "",
+              isFirstLogin: updatedUser.isFirstLogin,
+            })
+          )
+        })
+        .catch(console.error)
+    }
+  }, [user, dispatch])
 
   const navGroups = [
     {
@@ -68,6 +87,7 @@ export const AdminLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+
       {/* Sidebar */}
       <aside className={theme.sidebar.wrapper}>
         <div className={theme.sidebar.logo}>
@@ -135,6 +155,7 @@ export const AdminLayout: React.FC = () => {
           {/* Right Side: Date and Time */}
           <div className="flex-1 flex items-center justify-end gap-3 text-xs text-slate-500 font-medium">
             <span className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg shadow-sm border border-slate-100">
+
               <Calendar className="h-4 w-4 text-orange-500" />
               {new Intl.DateTimeFormat('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }).format(currentTime)}
             </span>
@@ -147,6 +168,7 @@ export const AdminLayout: React.FC = () => {
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto p-6 bg-slate-50 relative">
+
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />

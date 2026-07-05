@@ -3,13 +3,14 @@ import { useForm, FormProvider, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { toast } from "sonner"
-import { UtensilsCrossed, MoreVertical, Pencil, Trash2, Plus, X, Loader2, Image as ImageIcon } from "lucide-react"
+import { UtensilsCrossed, MoreVertical, Pencil, Trash2, Plus, X, Loader2, Image as ImageIcon, Sparkles } from "lucide-react"
 
 import { MenuItemService } from "@/services/menuItem.service"
 import { CategoryService } from "@/services/category.service"
 import { RestaurantService } from "@/services/restaurant.service"
 import type { MenuItem, Category } from "@/types"
 import { theme } from "@/lib/theme"
+import { generateMenuItemAI } from "@/api/menu.api"
 
 import { PageHeader, EmptyState, ConfirmDialog } from "@/components/shared"
 import { Button } from "@/components/ui/button"
@@ -158,6 +159,8 @@ export default function MenuItems() {
   const [editTarget, setEditTarget] = useState<MenuItem | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+
 
   const methods = useForm<any>({
     resolver: zodResolver(menuItemSchema),
@@ -244,6 +247,38 @@ export default function MenuItems() {
       toast.error(error instanceof Error ? error.message : "Failed to upload image")
     } finally {
       setIsUploading(false)
+    }
+  }
+
+  const handleAIGenerate = async () => {
+    const name = methods.getValues("name")
+    const categoryId = methods.getValues("categoryId")
+    const categoryName = categories.find(c => c._id === categoryId)?.name
+
+    if (!name || !categoryName) {
+      toast.error("Please enter a name and select a category first.")
+      return
+    }
+
+    setIsGenerating(true)
+    try {
+      const res = await generateMenuItemAI({ name, categoryName })
+      if (res.data.success) {
+        const { description, tags, suggestedPrice, price } = res.data.data
+        const finalPrice = suggestedPrice !== undefined ? suggestedPrice : (price !== undefined ? price : 0)
+        
+        methods.setValue("description", description)
+        methods.setValue("price", finalPrice)
+        methods.setValue("tags", tags.join(", "))
+        
+        toast.success("Content generated successfully!")
+      } else {
+        toast.error(res.data.message || "Failed to generate content")
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "API error occurred")
+    } finally {
+      setIsGenerating(false)
     }
   }
 
@@ -365,12 +400,30 @@ export default function MenuItems() {
           <div className="py-6">
             <FormProvider {...methods}>
               <form id="menu-form" onSubmit={methods.handleSubmit(onSubmit)} className={theme.formGap}>
-                <FormField
-                  name="name"
-                  label="Item Name"
-                  control={methods.control}
-                  placeholder="e.g. Margherita Pizza"
-                />
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
+                    <FormField
+                      name="name"
+                      label="Item Name"
+                      control={methods.control}
+                      placeholder="e.g. Margherita Pizza"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleAIGenerate}
+                    disabled={isGenerating}
+                    className="bg-amber-600 hover:bg-amber-700 text-white shrink-0 h-10"
+                  >
+                    {isGenerating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-1.5" />
+                    )}
+                    AI Generate
+                  </Button>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   {variantFields.length === 0 && (
                     <FormField

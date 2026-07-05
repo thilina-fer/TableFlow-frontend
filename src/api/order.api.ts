@@ -54,3 +54,7 @@ export const markCashPayment = (id: string) =>
 
 export const downloadBill = (id: string) =>
   api.get(`/cashier/${id}/bill`, { responseType: "blob" })
+
+export const getCashierOrderHistory = () =>
+  api.get<ApiResponse<Order[]>>("/cashier/history")
+
