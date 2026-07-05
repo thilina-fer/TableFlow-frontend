@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { AnimatePresence } from "framer-motion"
 import { PageTransition } from "@/components/layout/PageTransition"
 import logoImage from "@/assets/logo.png"
+
 export const SuperAdminLayout: React.FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -46,6 +47,7 @@ export const SuperAdminLayout: React.FC = () => {
 
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+
       {/* Sidebar */}
       <aside className={theme.sidebar.wrapper}>
         <div className={theme.sidebar.logo}>
@@ -103,10 +105,12 @@ export const SuperAdminLayout: React.FC = () => {
           <div className="flex items-center gap-4">
             {/* Topbar actions can go here */}
           </div>
+
         </header>
 
         {/* Page Content */}
         <main className="flex-1 overflow-auto p-6 bg-slate-50 relative">
+
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
               <Outlet />
